@@ -1,24 +1,30 @@
 <template>
-  <div class="profile-display-container">
-    <h2>User Profile</h2>
+  <div class="profile-page">
+    <div class="profile-display-container">
+      <h2>User Profile</h2>
 
-    <!-- ✅ Profile Picture -->
-    <img :src="profileImageUrl || defaultProfilePic" alt="Profile Picture" class="profile-img" />
+      <!-- ✅ Profile Picture or Initial Placeholder -->
+      <div class="profile-img-container">
+        <img v-if="profileImageUrl" :src="profileImageUrl" alt="Profile Picture" class="profile-img" />
+        <div v-else class="profile-placeholder">{{ username.charAt(0).toUpperCase() }}</div>
+      </div>
 
-    <p><strong>Username:</strong> {{ username || "Not provided" }}</p>
-    <p><strong>Email:</strong> {{ email || "Not provided" }}</p>
-    <p><strong>Complete Name:</strong> {{ completeName || "Not provided" }}</p>
-    <p><strong>Age:</strong> {{ age || "Not provided" }}</p>
-    <p><strong>Birthday:</strong> {{ birthday || "Not provided" }}</p>
-    <p><strong>Cellphone Number:</strong> {{ cellphone || "Not provided" }}</p>
-    <p><strong>Gender:</strong> {{ gender || "Not provided" }}</p>
-    <p><strong>Address:</strong> {{ address || "Not provided" }}</p>
+      <div class="profile-details">
+        <p><strong>Username:</strong> {{ username || "Not provided" }}</p>
+        <p><strong>Email:</strong> {{ email || "Not provided" }}</p>
+        <p><strong>Complete Name:</strong> {{ completeName || "Not provided" }}</p>
+        <p><strong>Age:</strong> {{ age || "Not provided" }}</p>
+        <p><strong>Birthday:</strong> {{ birthday || "Not provided" }}</p>
+        <p><strong>Cellphone Number:</strong> {{ cellphone || "Not provided" }}</p>
+        <p><strong>Gender:</strong> {{ gender || "Not provided" }}</p>
+        <p><strong>Address:</strong> {{ address || "Not provided" }}</p>
+        <p><strong>Account Status:</strong> <span :class="status === 'active' ? 'active' : 'deactivated'">{{ status }}</span></p>
+      </div>
 
-    <p><strong>Account Status:</strong> <span :class="status === 'active' ? 'active' : 'deactivated'">{{ status }}</span></p>
+      <router-link to="/edit-profile" class="edit-profile-button">Edit Profile</router-link>
 
-    <router-link to="/edit-profile">Edit Profile</router-link>
-
-    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+    </div>
   </div>
 </template>
 
@@ -40,9 +46,6 @@ export default {
     const profileImageUrl = ref("");
     const status = ref("");
     const errorMessage = ref("");
-
-    // ✅ Default Profile Picture
-    const defaultProfilePic = "https://via.placeholder.com/100";
 
     onMounted(async () => {
       const user = auth.currentUser;
@@ -75,23 +78,73 @@ export default {
       }
     });
 
-    return { username, email, completeName, age, birthday, cellphone, gender, address, profileImageUrl, status, defaultProfilePic, errorMessage };
+    return { username, email, completeName, age, birthday, cellphone, gender, address, profileImageUrl, status, errorMessage };
   },
 };
 </script>
 
 <style scoped>
+.profile-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: url('@/assets/let.png') no-repeat center center/cover;
+}
+
 .profile-display-container {
   text-align: center;
-  max-width: 400px;
-  margin: auto;
+  max-width: 600px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  font-family: 'Poppins', sans-serif;
+}
+
+h2 {
+  color: #388e3c;
+  font-weight: bold;
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+.profile-img-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
 .profile-img {
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
-  margin-bottom: 10px;
+  border: 4px solid #2e7d32;
+}
+
+.profile-placeholder {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: #2e7d32;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 50px;
+  font-weight: bold;
+}
+
+.profile-details {
+  text-align: left;
+  background: #f1f8e9;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+p {
+  font-size: 18px;
+  margin: 10px 0;
 }
 
 .active {
@@ -102,21 +155,5 @@ export default {
 .deactivated {
   color: red;
   font-weight: bold;
-}
-
-p {
-  font-size: 16px;
-  margin: 8px 0;
-}
-
-a {
-  display: block;
-  margin-top: 15px;
-  color: blue;
-  text-decoration: none;
-}
-
-.error-message {
-  color: red;
 }
 </style>

@@ -1,12 +1,5 @@
 <template>
   <div :class="darkMode ? 'dark' : ''">
-    <header class="app-header">
-      <h1>{{ appTitle }}</h1>
-      <button @click="toggleDarkMode">
-        {{ darkMode ? '🌞 Light Mode' : '🌙 Dark Mode' }}
-      </button>
-    </header>
-
     <transition name="fade" mode="out-in">
       <router-view />
     </transition>
@@ -14,17 +7,11 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { ref, onMounted } from "vue";
 
 export default {
   setup() {
     const darkMode = ref(localStorage.getItem("darkMode") === "true");
-    const route = useRoute();
-
-    const appTitle = computed(() => {
-      return route.path.includes("admin") ? "Admin Panel" : "User Dashboard";
-    });
 
     const toggleDarkMode = () => {
       darkMode.value = !darkMode.value;
@@ -36,10 +23,11 @@ export default {
       document.documentElement.classList.toggle("dark", darkMode.value);
     });
 
-    return { darkMode, toggleDarkMode, appTitle };
+    return { darkMode, toggleDarkMode };
   },
 };
 </script>
+
 
 <style>
 /* ✅ Make the App Responsive */
