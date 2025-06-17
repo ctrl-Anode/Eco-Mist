@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "sensor_data": {
+      "$deviceId": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid != null"
+      }
+    },
+    ".read": true,
+    ".write": true
+  }
+}

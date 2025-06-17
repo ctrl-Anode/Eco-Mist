@@ -1,0 +1,155 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      // Safely check if user is admin
+      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return userDoc != null && 
+             userDoc.data != null && 
+             userDoc.data.role == 'admin';
+    }
+
+    function isValidTransaction() {
+      let requiredFields = ['amount', 'type', 'category', 'date', 'notes'];
+      let data = request.resource.data;
+      
+      return data.keys().hasAll(requiredFields) &&
+             (data.type == 'income' || data.type == 'expense') &&
+             data.amount is number &&
+             data.amount > 0 &&
+             data.date is timestamp;
+    }
+
+    // User collection rules
+    match /users/{userId} {
+      // Allow any authenticated user to read basic user info
+      allow read: if isAuthenticated();
+      // Allow users to create their own profiles
+      allow create: if isAuthenticated() && isOwner(userId);
+      // Allow users to update their own profiles or admins to update any profile
+      allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      
+      // Transactions subcollection rules
+      match /transactions/{transactionId} {
+        allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+        allow create, update: if isAuthenticated() && 
+                              (isOwner(userId) || isAdmin()) && 
+                              isValidTransaction();
+        allow delete: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      }
+    }
+
+    // Contact messages collection
+    match /contact_messages/{messageId} {
+      // Allow admins to read all messages
+      allow read: if isAuthenticated() && isAdmin();
+      // Allow anyone to create messages without authentication
+      allow create: if request.resource.data.keys().hasAll(['name', 'email', 'message', 'timestamp']) &&
+        request.resource.data.name is string &&
+        request.resource.data.email is string &&
+        request.resource.data.message is string &&
+        request.resource.data.timestamp is timestamp;
+      // Allow only admins to delete messages
+      allow delete: if isAuthenticated() && isAdmin();
+    }
+
+    // Messages collection with enhanced rules
+    match /messages/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        // Allow updating own messages
+        resource.data.userId == request.auth.uid ||
+        // Allow adding/removing reactions
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions'])
+      );
+      allow delete: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+    }
+
+    // Typing status collection
+    match /typing/{typingId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid;
+      // This doesn't actually auto-delete, it just allows anyone to delete old typing indicators
+      allow delete: if resource.data.timestamp < timestamp.date(2000, 1, 1);
+    }
+
+    // User status/presence collection
+    match /status/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isOwner(userId);
+    }
+
+    // Analysis History Collection
+    match /analysisHistory/{documentId} {
+      // Allow authenticated users to read and write their own analysis history
+      allow read, write: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+
+      // Validate the structure of the document
+      allow write: if request.resource.data.keys().hasAll(['date', 'imageUrl', 'result', 'userId']) &&
+                   request.resource.data.date is timestamp &&
+                   request.resource.data.imageUrl is string &&
+                   request.resource.data.result is map &&
+                   request.resource.data.userId == request.auth.uid;
+    }
+
+    // Message attachments collection
+    match /attachments/{attachmentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+    }
+
+    // Feedback collection
+    match /feedback/{feedbackId} {
+      // Allow admins to read all feedback
+      allow read: if isAuthenticated() && isAdmin();
+      // Allow authenticated users to create feedback
+      allow create: if isAuthenticated() &&
+        request.resource.data.keys().hasAll(['type', 'message', 'username', 'timestamp']) &&
+        request.resource.data.type is string &&
+        request.resource.data.message is string &&
+        request.resource.data.username is string &&
+        request.resource.data.timestamp is timestamp;
+      // Allow admins to delete feedback
+      allow delete: if isAuthenticated() && isAdmin();
+    }
+
+    // System logs collection
+    match /system_logs/{logId} {
+      allow read: if isAuthenticated() && isAdmin();
+      allow create: if isAuthenticated();
+      allow delete: if isAuthenticated() && isAdmin();
+    }
+
+    // Admin-only collections
+    match /system/{document=**} {
+      allow read, write: if isAuthenticated() && isAdmin();
+    }
+
+    // Public collections (if needed)
+    match /public/{document=**} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isAdmin();
+    }
+
+    // Sensor data collection
+    match /sensor_data/{deviceId} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}

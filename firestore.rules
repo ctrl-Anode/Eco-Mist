@@ -1,0 +1,163 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helper Functions ─────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return userDoc != null && userDoc.data != null && userDoc.data.role == 'admin';
+    }
+
+    function isValidTransaction() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['amount', 'type', 'category', 'date', 'notes']) &&
+             (data.type == 'income' || data.type == 'expense') &&
+             data.amount is number && data.amount > 0 &&
+             data.date is timestamp;
+    }
+
+    // ─── User Collection ───────────────────────────────
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
+
+      // ─── Transactions Subcollection ──────
+      match /transactions/{transactionId} {
+        allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+        allow create, update: if isAuthenticated() &&
+                              (isOwner(userId) || isAdmin()) &&
+                              isValidTransaction();
+        allow delete: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      }
+      // ─── Budget Subcollection ──────
+       match /budgets/{monthId} {
+    allow read, write: if isAuthenticated() && isOwner(userId);
+  }
+    }
+    
+
+
+    // ─── Contact Messages ──────────────────────────────
+    match /contact_messages/{messageId} {
+      allow read, delete: if isAuthenticated() && isAdmin();
+      allow create: if request.resource.data.keys().hasAll(['name', 'email', 'message', 'timestamp']) &&
+                    request.resource.data.name is string &&
+                    request.resource.data.email is string &&
+                    request.resource.data.message is string &&
+                    request.resource.data.timestamp is timestamp;
+    }
+
+    // ─── Messages ───────────────────────────────────────
+    match /messages/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions'])
+      );
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // ─── Typing Status ─────────────────────────────────
+    match /typing/{typingId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isAuthenticated() &&
+                            request.resource.data.userId == request.auth.uid;
+      allow delete: if resource.data.timestamp < timestamp.date(2000, 1, 1); // fallback
+    }
+
+    // ─── User Presence Status ──────────────────────────
+    match /status/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isOwner(userId);
+    }
+
+   // ─── Analysis History ──────────────────────────────
+match /analysisHistory/{documentId} {
+  // ✅ Allow user to read only their own entries
+  allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+  // ✅ Allow creation only if all required fields are correct
+  allow create: if isAuthenticated() &&
+    request.resource.data.userId == request.auth.uid &&
+    request.resource.data.keys().hasAll([
+      'userId',
+      'imageUrl',
+      'prediction',
+      'confidence',
+      'classProbabilities',
+      'recommendations',
+      'createdAt'
+    ]) &&
+    request.resource.data.userId is string &&
+    request.resource.data.imageUrl is string &&
+    request.resource.data.prediction is string &&
+    request.resource.data.confidence is number &&
+    request.resource.data.classProbabilities is map &&
+    request.resource.data.recommendations is list &&
+    request.resource.data.createdAt is timestamp;
+
+  // ✅ Allow delete or update by owner or admin
+  allow update, delete: if isAuthenticated() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
+}
+
+
+
+    // ─── Message Attachments ───────────────────────────
+    match /attachments/{attachmentId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isAuthenticated() &&
+                            request.resource.data.userId == request.auth.uid;
+    }
+
+    // ─── Feedback ──────────────────────────────────────
+    match /feedback/{feedbackId} {
+      allow read, delete: if isAuthenticated() && isAdmin();
+      allow create: if isAuthenticated() &&
+                    request.resource.data.keys().hasAll(['type', 'message', 'username', 'timestamp']) &&
+                    request.resource.data.type in ['suggestion', 'bug', 'question', 'other'] &&
+                    request.resource.data.message.size() > 0 &&
+                    request.resource.data.username.size() > 0 &&
+                    request.resource.data.timestamp is timestamp;
+    }
+
+    // ─── System Logs ───────────────────────────────────
+    match /system_logs/{logId} {
+      allow read, delete: if isAuthenticated() && isAdmin();
+      allow create: if isAuthenticated() &&
+                    request.resource.data.keys().hasAll(['type', 'message', 'timestamp', 'user', 'userRole']) &&
+                    request.resource.data.type in ['info', 'warning', 'error', 'success'] &&
+                    request.resource.data.message.size() > 0 &&
+                    request.resource.data.timestamp is timestamp &&
+                    request.resource.data.user.size() > 0 &&
+                    request.resource.data.userRole in ['admin', 'user'];
+    }
+
+    // ─── Admin-only Configurations ─────────────────────
+    match /system/{document=**} {
+      allow read, write: if isAuthenticated() && isAdmin();
+    }
+
+    // ─── Public Collection ─────────────────────────────
+    match /public/{document=**} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isAdmin();
+    }
+
+    // ─── IoT Sensor Data ───────────────────────────────
+    match /sensor_data/{deviceId} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}
