@@ -71,6 +71,11 @@
 <script setup>
 import { ref } from 'vue';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth'
+
+
+const auth = getAuth()
+
 
 const props = defineProps({
   username: String
@@ -92,7 +97,6 @@ const handleCancel = () => {
 const forceClose = () => {
   emit('close');
 };
-
 const submit = async () => {
   if (!message.value.trim()) {
     emit('submitted', { success: false, message: 'Please enter your feedback message.' });
@@ -101,19 +105,18 @@ const submit = async () => {
 
   submitting.value = true;
   try {
+    const auth = getAuth(); // ✅ define it here
     await addDoc(collection(db, 'feedback'), {
       type: type.value,
       message: message.value,
       username: props.username || 'Anonymous',
+      userId: auth.currentUser.uid, // ✅ use securely
       timestamp: new Date()
     });
     emit('submitted', { success: true });
 
-    // Optional: reset form before closing
     type.value = 'suggestion';
     message.value = '';
-
-    // Close the modal
     forceClose();
   } catch (error) {
     console.error('Feedback submit error:', error);
@@ -122,4 +125,5 @@ const submit = async () => {
     submitting.value = false;
   }
 };
+
 </script>

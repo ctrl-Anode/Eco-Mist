@@ -31,14 +31,15 @@
             :disabled="loading"
           />
           <div
-            v-if="loginForm.email && !loginErrors.email && loginForm.email.includes('@')"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-green-400"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 4 12 14.01 9 11.01" />
-            </svg>
-          </div>
+  v-if="loginForm.email && !loginErrors.email && loginForm.email.includes('@')"
+  class="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 bg-white rounded-full p-1 shadow"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 4 12 14.01 9 11.01" />
+  </svg>
+</div>
+
           <p v-if="loginErrors.email" class="text-red-400 text-xs mt-1 flex items-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -52,49 +53,39 @@
 
         <!-- Password Field -->
         <div class="relative">
-          <input
-            :type="showPassword ? 'text' : 'password'"
-            v-model="loginForm.password"
-            :class="[
-              'w-full rounded-lg px-4 py-3 transition-all focus:outline-none focus:ring-1',
-              loginErrors.password ? 'border-red-500 bg-red-100/40' :
-              loginForm.password && loginForm.password.length >= 6 ? 'border-green-500 bg-green-100/40' :
-              'bg-white/20 border-white/30 text-white placeholder-white/50'
-            ]"
-            required
-            placeholder="Password"
-            :disabled="loading"
-          />
-          <button
-            type="button"
-            @click="togglePassword"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-200 hover:text-green-300"
-            :disabled="loading"
-            aria-label="Toggle password visibility"
-          >
-            <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-              <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
-              <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
-              <line x1="2" x2="22" y1="2" y2="22" />
-            </svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </button>
-          <p v-if="loginErrors.password" class="text-red-400 text-xs mt-1 flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
-                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" x2="12" y1="8" y2="12" />
-              <line x1="12" x2="12.01" y1="16" y2="16" />
-            </svg>
-            <span>{{ loginErrors.password }}</span>
-          </p>
-        </div>
+  <input
+    :type="showPassword ? 'text' : 'password'"
+    v-model="loginForm.password"
+    class="w-full rounded-lg px-4 py-3 pr-12 transition-all focus:outline-none focus:ring-1 bg-white/20 border-white/30 text-white placeholder-white/50"
+    required
+    placeholder="Password"
+    :disabled="loading"
+  />
+  <!-- Password Visibility Toggle Button with Lordicon -->
+<button
+  type="button"
+  @click="togglePassword"
+  class="absolute right-3 top-1/2 -translate-y-1/2"
+>
+  <lord-icon
+    v-if="!showPassword"
+    src="https://cdn.lordicon.com/dxjqoygy.json"
+    trigger="hover"
+    colors="primary:#ffffff"
+    style="width:28px;height:28px"
+  ></lord-icon>
+
+  <lord-icon
+    v-else
+    src="https://cdn.lordicon.com/dnmvmpfk.json" 
+    trigger="hover"
+    colors="primary:#ffffff"
+    style="width:28px;height:28px"
+  ></lord-icon>
+</button>
+
+</div>
+
       </div>
 
       <!-- Remember Me & Forgot Password -->
@@ -169,7 +160,7 @@
       <!-- Toggle View Prompt -->
       <p class="text-xs text-white/80 mt-4 text-center">
         Don't have an account?
-        <button @click="$emit('toggleView')" class="text-green-300 hover:text-green-400 hover:underline">
+        <button type= "button" @click="$emit('toggleView')" class="text-green-300 hover:text-green-400 hover:underline">
           Register
         </button>
       </p>
@@ -214,6 +205,12 @@ const loginForm = reactive({
   password: "",
   rememberMe: false,
 });
+
+const showPassword = ref(false); 
+function togglePassword() {
+  showPassword.value = !showPassword.value;
+}
+
 
 const loading = ref(false);
 const notification = ref({ show: false, message: "", type: "" }); // Notification state

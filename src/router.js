@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { getAuth, signOut } from "firebase/auth"; // ✅ Import signOut here
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth"; // Added onAuthStateChanged for better auth state handling
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -7,30 +7,10 @@ import LandingPage from './views/LandingPage.vue';
 import UserAuth from './views/EcoAuth.vue';
 import EcoUserParent from './views/EcoUserParent.vue';
 
-//import EditUserProfile from './assets/LegacyCode/EditUserProfile.vue';
-//import UserDashboard from './assets/LegacyCode/User_Dashboard.vue';
-//import UserProfileDisplay from './assets/LegacyCode/UserProfileDisplay.vue';
 import AdminDashboard from './components/EcoAdmin/Admin_Dashboard.vue';
-//import ResetPassword from './assets/LegacyCode/ResetPassword.vue';
 import AdminManagement from "./components/EcoAdmin/AdminManagement.vue";
-//import FinancialManagement from './components/EcoUser/Financial/FinancialManagement.vue';
-
-//import MessengerChat from './assets/LegacyCode/MessengerChat.vue';
-
-//import SensorData from './components/EcoUser/Sensor/SensorData.vue';
-
-//import MyModel from './components/EcoUser/Detection/Ecomist_Model.vue';
-
-
-
-//import EcoSettings from "./assets/LegacyCode/EcoSettings.vue"
-//import ThresholdControl from "./components/EcoUser/Sensor/ThresholdControl.vue"
 
 import EcoTry from "./components/EcoTry.vue"
-
-//import DeviceRegistration from './components/EcoUser/Sensor/DeviceRegistration.vue';
-//import ThresholdConfig from './components/EcoUser/Sensor/ThresholdConfig.vue';
-//import WiFiConfig from './components/EcoUser/Sensor/WiFiConfig.vue';
 
 import DeviceLogs from './components/EcoAdmin/DeviceLogs.vue';
 import SystemLogs from './components/EcoAdmin/SystemLogs.vue';
@@ -48,25 +28,11 @@ import SampleSensor from './components/EcoUserChild/SampleSensor.vue';
 
 const routes = [
   { path: '/', name: 'LandingPage', component: LandingPage },
-  //{ path: '/register', name: 'UserRegister', component: UserRegister },
-  //{ path: '/login', name: 'UserLogin', component: UserLogin },
-  //{ path: '/edit-profile', name: 'EditUserProfile', component: EditUserProfile, meta: { requiresAuth: true, role: 'user' } },
-  //{ path: '/dashboard', name: 'UserDashboard', component: UserDashboard, meta: { requiresAuth: true} },
-  //{ path: '/profile-display', name: 'UserProfileDisplay', component: UserProfileDisplay, meta: { requiresAuth: true, role: 'user' } },
+  
   { path: '/admin-dashboard', name: 'AdminDashboard', component: AdminDashboard, meta: { requiresAuth: true, role: 'admin' } },
-  //{ path: '/reset-password', name: 'ResetPassword', component: ResetPassword },
   { path: "/admin-management", name: "AdminManagement", component: AdminManagement, meta: { requiresAuth: true, role: "admin" } },
-  //{ path: '/financial-management', component: FinancialManagement, meta: { requiresAuth: true, role: 'user' } },
-  //{path: '/messenger',name: 'Messenger',component: MessengerChat,meta: { requiresAuth: true }},
-  //{ path: '/sensor_data', component: SensorData, meta: { requiresAuth: true, role: 'user' } },
-  //{ path: '/model',name: 'MyModel', component: MyModel, meta: { requiresAuth: true, role: 'user'} },
   { path: '/auth', name: 'UserAuth', component: UserAuth },
-  //{ path: "/settings", name: "EcoSettings", component: EcoSettings, meta: { requiresAuth: true } },
-  //{ path: "/threshold_controller", name: "ThresholdControl", component: ThresholdControl, meta: { requiresAuth: true } },
   { path: '/try', name: 'EcoTry', component: EcoTry },
-  //{ path: '/device', component: DeviceRegistration , meta: { requiresAuth: true, role: 'user' } },
-  //{ path: '/threshold', component: ThresholdConfig , meta: { requiresAuth: true, role: 'user' } },
-  //{ path: '/wifi', component: WiFiConfig , meta: { requiresAuth: true, role: 'user' } },
 
   { path: '/device-logs', component: DeviceLogs , meta: { requiresAuth: true} },
   { path: '/system-logs', component: SystemLogs , meta: { requiresAuth: true} },
@@ -74,19 +40,19 @@ const routes = [
   {  // 🔹Tryyyyy EcoUserLayout for User Profile Display
   path: '/user',
     component: EcoUserParent,
-    //meta: { requiresAuth: true, role: 'user' },
+    meta: { requiresAuth: true },
     children: [
-      { path: 'profile-display', component: EcoProfilePage },
-      { path: 'dashboard', component: SampleDashboard },
-      { path: 'messenger', component: SampleMessenger },
-      { path: 'model', component: SampleDetector },
-      { path: 'financial-management', component: SampleFinancial },
-      { path: 'sensor_data', component: SampleSensor },
-      { path: 'settings', component: EcoSettingsParent,
+      { path: 'profile-display', component: EcoProfilePage, meta: { requiresAuth: true, role: 'user' } },
+      { path: 'dashboard', component: SampleDashboard, meta: { requiresAuth: true, role: 'user' } },
+      { path: 'messenger', component: SampleMessenger, meta: { requiresAuth: true} },
+      { path: 'model', component: SampleDetector, meta: { requiresAuth: true, role: 'user' } },
+      { path: 'financial-management', component: SampleFinancial, meta: { requiresAuth: true, role: 'user' } },
+      { path: 'sensor_data', component: SampleSensor, meta: { requiresAuth: true, role: 'user' } },
+      { path: 'settings', component: EcoSettingsParent, meta: { requiresAuth: true },
         children: [
-         { path: 'profile-display', component: EcoProfilePage },
-         { path: 'edit-profile', component: SampleEditProfile },
-         { path: 'reset-password', component: SampleResetPassword },
+         { path: 'profile-display', component: EcoProfilePage, meta: { requiresAuth: true } },
+         { path: 'edit-profile', component: SampleEditProfile, meta: { requiresAuth: true } },
+         { path: 'reset-password', component: SampleResetPassword, meta: { requiresAuth: true } },
       ]
        },
       
@@ -107,6 +73,7 @@ router.beforeEach(async (to, from, next) => {
 
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     if (!user) {
+      console.warn("Unauthorized access attempt. Redirecting to /auth.");
       next("/auth");
       return;
     }
@@ -119,17 +86,18 @@ router.beforeEach(async (to, from, next) => {
         const userRole = userSnap.data().role;
 
         if (to.meta.role && to.meta.role !== userRole) {
-          alert("Access denied.");
+          console.warn(`Access denied for role: ${userRole}. Redirecting to /dashboard.`);
           next("/dashboard");
           return;
         }
 
         next();
       } else {
+        console.error("User document does not exist. Redirecting to /auth.");
         next("/auth");
       }
     } catch (error) {
-      console.error("Error checking user role:", error);
+      console.error("Error checking user role:", error.message);
       next("/auth");
     }
   } else {
@@ -145,8 +113,17 @@ export const logoutUser = async () => {
     alert("You have been logged out.");
     router.push("/auth");
   } catch (error) {
-    console.error("Logout failed:", error);
+    console.error("Logout failed:", error.message);
   }
 };
+
+// 🔹 Firebase Auth State Listener (Optional Enhancement)
+onAuthStateChanged(getAuth(), (user) => {
+  if (user) {
+    console.log("User is signed in:", user.email);
+  } else {
+    console.log("No user is signed in.");
+  }
+});
 
 export default router;

@@ -34,7 +34,7 @@
 <script setup>
 const props = defineProps({
   completeName: String,
-  age: String,
+  age: [String, Number], // Allow both String and Number
   birthday: String,
   gender: String
 });

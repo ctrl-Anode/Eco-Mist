@@ -337,8 +337,15 @@ const canvasRef = vueRef(null);
 
 // Start camera stream on mount
 onMounted(() => {
-  fetchModelInfo(); // keep your model info fetch
-  loadHistory(); // Load analysis history
+  fetchModelInfo();
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      loadHistory();
+    } else {
+      console.warn("User not authenticated. Skipping history load.");
+    }
+  });
 });
 
 const initCamera = async () => {
@@ -569,6 +576,10 @@ const drawCharts = (summary, confidenceTrend, labelGroups) => {
 
 watch(activeTab, (val) => {
   if (val === 'Insights') {
+    if (!auth.currentUser) {
+      console.warn("User not authenticated. Skipping insights load.");
+      return;
+    }
     loadInsights();
   }
 });

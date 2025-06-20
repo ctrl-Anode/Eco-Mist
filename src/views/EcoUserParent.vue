@@ -204,9 +204,14 @@ const logout = async () => {
 };
 
 onMounted(() => {
-  fetchUserProfile();
-  onAuthStateChanged(getAuth(), (user) => {
-    if (!user) router.push('/auth');
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      fetchUserProfile(); // ✅ Only fetch if logged in
+    } else {
+      router.push('/auth'); // 🚪 Redirect if logged out
+    }
   });
 });
+
 </script>

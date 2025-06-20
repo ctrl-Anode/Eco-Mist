@@ -49,7 +49,7 @@
 
     <!-- Profile Image and Username -->
     <transition-group name="fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4 w-full">
-      <div class="flex flex-col items-center sm:col-span-1">
+      <div class="flex flex-col items-center sm:col-span-1" :key="'profile-image'">
         <div
           class="relative w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-green-200"
         >
@@ -109,7 +109,7 @@
       </div>
 
       <!-- Username Field -->
-      <div class="sm:col-span-2 flex flex-col justify-center">
+      <div class="sm:col-span-2 flex flex-col justify-center" :key="'username-field'">
         <input
           type="text"
           v-model="registerForm.username"

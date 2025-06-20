@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import { inject, onMounted, onUnmounted, watch } from 'vue';
+import { inject, ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import EcoUser_MainContent from '../EcoMist_User/EcoUser_MainContent.vue';
 import EcoUser_ProfileHeader from '../EcoMist_User/EcoUser_ProfileHeader.vue';
@@ -43,10 +43,22 @@ const role = inject('role');
 const profileImageUrl = inject('profileImageUrl');
 const status = inject('status');
 const completeName = inject('completeName');
-const age = inject('age');
-const birthday = inject('birthday');
+const birthday = ref(inject('birthday')); // Wrap birthday with ref to make it reactive
 const gender = inject('gender');
 const address = inject('address');
+
+// Dynamically calculate age based on birthday
+const age = computed(() => {
+  if (!birthday.value) return 'Not provided';
+  const birthDate = new Date(birthday.value);
+  const today = new Date();
+  let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    calculatedAge--;
+  }
+  return isNaN(calculatedAge) ? 'Not provided' : String(calculatedAge); // Ensure age is a String
+});
 
 let refreshInterval;
 const router = useRouter();

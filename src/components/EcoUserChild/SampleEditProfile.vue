@@ -129,16 +129,6 @@
                     />
                   </div>
                   <div class="form-group">
-                    <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age</label>
-                    <input 
-                      type="number" 
-                      id="age"
-                      v-model="age" 
-                      class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                      required
-                    />
-                  </div>
-                  <div class="form-group">
                     <label for="birthday" class="block text-sm font-medium text-gray-700 mb-1">Birthday</label>
                     <input 
                       type="date" 
@@ -147,6 +137,10 @@
                       class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                       required
                     />
+                  </div>
+                  <div class="form-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                    <p class="text-gray-800">{{ age ?? 'N/A' }}</p>
                   </div>
                   <div class="form-group">
                     <label for="cellphone" class="block text-sm font-medium text-gray-700 mb-1">Cellphone Number</label>
@@ -337,7 +331,6 @@ const currentRoute = computed(() => route.path);
 // State variables
 const username = ref("");
 const completeName = ref("");
-const age = ref("");
 const birthday = ref("");
 const cellphone = ref("");
 const gender = ref("");
@@ -484,12 +477,6 @@ const validateField = (field, value) => {
   if (!trimmedValue) {
     return `${field} is required.`;
   }
-  if (field === "Age") {
-    const ageValue = Number(value);
-    if (isNaN(ageValue) || ageValue < 0 || ageValue > 120) {
-      return "Please enter a valid age.";
-    }
-  }
   return "";
 };
 
@@ -499,7 +486,6 @@ const updateProfileInfo = async () => {
 
   const errors = {
     completeName: validateField("Complete Name", completeName.value),
-    age: validateField("Age", age.value),
     birthday: validateField("Birthday", birthday.value),
     cellphone: validateField("Cellphone Number", cellphone.value),
     gender: validateField("Gender", gender.value),
@@ -520,7 +506,6 @@ const updateProfileInfo = async () => {
     const userRef = doc(db, "users", user.uid);
     await updateDoc(userRef, {
       completeName: completeName.value,
-      age: age.value,
       birthday: birthday.value,
       cellphone: cellphone.value,
       gender: gender.value,
@@ -663,6 +648,19 @@ const closeModal = () => {
   emailSentMessage.value = "";
 };
 
+// Dynamically calculate age based on birthday
+const age = computed(() => {
+  if (!birthday.value) return 'N/A';
+  const birthDate = new Date(birthday.value);
+  const today = new Date();
+  let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    calculatedAge--;
+  }
+  return isNaN(calculatedAge) ? 'N/A' : String(calculatedAge); // Ensure age is a String
+});
+
 // Watch for route changes
 watch(currentRoute, () => {
   if (isMobile.value) {
@@ -696,7 +694,6 @@ onMounted(async () => {
       const data = userSnap.data();
       username.value = data.username || "";
       completeName.value = data.completeName || "";
-      age.value = data.age || "";
       birthday.value = data.birthday || "";
       cellphone.value = data.cellphone || "";
       gender.value = data.gender || "";

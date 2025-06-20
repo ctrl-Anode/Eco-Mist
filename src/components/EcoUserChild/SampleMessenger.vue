@@ -1,153 +1,127 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col">
+  <div class="min-h-screen bg-gradient-to-br from-green-50 via-green-100 to-green-200 flex flex-col">
+    <!-- Mobile Header -->
+    <header class="md:hidden bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4 py-3 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 p-2.5 rounded-xl shadow-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-bold text-slate-800">Messenger</h1>
+            <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+            <p class="text-xs text-slate-600 font-medium">{{ onlineUsers }} online</p>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-1">
+        <button 
+          @click="toggleSearch"
+          class="p-2.5 rounded-xl bg-slate-100/80 text-slate-600 hover:bg-slate-200/80 transition-all duration-200 hover:scale-105"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+        <button 
+          @click="toggleNotificationPanel"
+          class="relative p-2.5 rounded-xl bg-slate-100/80 text-slate-600 hover:bg-slate-200/80 transition-all duration-200 hover:scale-105"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          <span v-if="hasUnreadNotifications" class="absolute -top-1 -right-1 h-5 w-5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg animate-bounce">
+            {{ notificationCount > 9 ? '9+' : notificationCount }}
+          </span>
+        </button>
+        <button 
+          @click="showChatInfo = !showChatInfo"
+          class="p-2.5 rounded-xl bg-slate-100/80 text-slate-600 hover:bg-slate-200/80 transition-all duration-200 hover:scale-105"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
     <!-- Main Content Area -->
     <div class="flex flex-1 overflow-hidden">
-      <!-- Main Content -->
+      <!-- Desktop Header -->
       <main class="flex-1 overflow-y-auto bg-transparent p-4 md:p-6">
-        <!-- Page Header -->
-        <div class="mb-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <h1 class="text-3xl font-bold text-slate-800 mb-1">Messenger</h1>
-              <p class="text-slate-600">Chat with other Eco-Mist users</p>
-            </div>
-            <!-- Notification Bell -->
-            <div class="relative">
-              <button 
-                @click="toggleNotificationPanel"
-                class="relative p-3 rounded-full bg-white shadow-sm border border-slate-200 hover:bg-slate-50 transition-all duration-200 notification-bell"
-                :class="{ 'ring-2 ring-emerald-500': notificationPanelOpen }"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-                <span v-if="hasUnreadNotifications" class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                  {{ notificationCount > 9 ? '9+' : notificationCount }}
-                </span>
-              </button>
-              
-              <!-- Notification Panel -->
-              <div 
-                v-if="notificationPanelOpen"
-                class="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 z-50 notification-panel"
-              >
-                <div class="p-4 border-b border-slate-100">
-                  <div class="flex items-center justify-between">
-                    <h3 class="font-semibold text-slate-800">Notifications</h3>
-                    <div class="flex gap-2">
-                      <button 
-                        @click="markAllNotificationsAsRead"
-                        class="text-xs text-emerald-600 hover:text-emerald-700 font-medium"
-                      >
-                        Mark all read
-                      </button>
-                      <button 
-                        @click="clearAllNotifications"
-                        class="text-xs text-slate-500 hover:text-slate-700 font-medium"
-                      >
-                        Clear all
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div class="max-h-96 overflow-y-auto">
-                  <div v-if="notifications.length === 0" class="p-6 text-center text-slate-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
-                    <p>No notifications yet</p>
-                  </div>
-                  <div v-for="notification in notifications" :key="notification.id" 
-                       @click="handleNotificationClick(notification)"
-                       class="p-4 border-b border-slate-50 hover:bg-slate-50 cursor-pointer transition-colors"
-                       :class="{ 'bg-emerald-50': !notification.read }"
-                  >
-                    <div class="flex items-start gap-3">
-                      <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
-                           :class="getNotificationTypeClass(notification.type)"
-                      >
-                        <svg v-if="notification.type === 'message'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
-                        <svg v-else-if="notification.type === 'mention'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-slate-800 truncate">{{ notification.title }}</p>
-                        <p class="text-sm text-slate-600 mt-1">{{ notification.message }}</p>
-                        <p class="text-xs text-slate-400 mt-1">{{ formatTimestamp(notification.timestamp) }}</p>
-                      </div>
-                      <div v-if="!notification.read" class="w-2 h-2 bg-emerald-500 rounded-full flex-shrink-0"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <header class="hidden md:block mb-8">
+  <div class="p-6 border-b border-slate-100/50 bg-gradient-to-r from-emerald-50/50 via-teal-50/50 to-cyan-50/50 backdrop-blur-sm rounded-2xl">
+    <div class="flex justify-between items-center">
+      <!-- Chat Title & Icon -->
+      <div class="flex items-center gap-4">
+        <div class="bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 p-4 rounded-2xl shadow-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-slate-800">Community Chat</h2>
+          <p class="text-base text-slate-600">Real-time conversations</p>
+        </div>
+      </div>
+
+      <!-- Search + Online Status + Notifications -->
+      <div class="flex items-center gap-4">
+        <!-- Search Input -->
+        <div class="relative w-72">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
+          <input 
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search messages, users, or files..."
+            class="w-full pl-12 pr-12 py-3 bg-white/60 backdrop-blur-sm border border-white/20 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all shadow-sm text-sm focus:bg-white/80"
+          />
+          <button 
+            v-if="searchQuery" 
+            @click="searchQuery = ''" 
+            class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
-        <!-- Connection Status Banner -->
-        <div v-if="!isOnline" class="mb-6 bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
-          <div class="flex items-center">
-            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-12.728 12.728m0-12.728l12.728 12.728" />
-              </svg>
-            </div>
-            <div>
-              <span class="text-red-800 font-semibold">You are currently offline</span>
-              <p class="text-red-700 text-sm">Messages will be sent when you reconnect</p>
-            </div>
-          </div>
-          <div class="bg-red-200 px-3 py-1 rounded-full">
-            <span class="text-xs text-red-800 font-medium">{{ queuedMessages.length }} queued</span>
-          </div>
+        <!-- Online Users -->
+        <div class="flex items-center gap-3 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-xl shadow-sm border border-white/20">
+          <div class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+          <span class="text-sm font-semibold text-slate-700">{{ onlineUsers }} Online</span>
         </div>
 
-        <!-- Pinned Messages -->
-        <div v-if="pinnedMessages.length > 0" class="mb-6 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-4 shadow-sm">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="text-amber-800 font-semibold flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-              </svg>
-              Pinned Messages
-            </h3>
-            <button 
-              @click="collapsePinned = !collapsePinned" 
-              class="text-amber-700 hover:text-amber-800 p-1 rounded-lg hover:bg-amber-100 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform" :class="{ 'rotate-180': collapsePinned }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-          </div>
-          <div v-if="!collapsePinned" class="space-y-3">
-            <div v-for="msg in pinnedMessages" :key="msg.id" class="bg-white rounded-lg p-3 border border-amber-100">
-              <div class="flex justify-between items-start">
-                <div class="flex-1">
-                  <p class="text-sm text-slate-800">{{ msg.text }}</p>
-                  <p class="text-xs text-slate-500 mt-1">{{ formatTimestamp(msg.timestamp) }}</p>
-                </div>
-                <button 
-                  @click="unpinMessage(msg.id)" 
-                  class="text-xs text-red-500 hover:text-red-700 ml-3 px-2 py-1 rounded-md hover:bg-red-50 transition-colors"
-                >
-                  Unpin
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Search Bar -->
-        <div class="mb-6">
-          <div class="relative max-w-md">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <!-- Notifications -->
+        <button 
+          @click="toggleNotificationPanel"
+          class="relative p-3 rounded-xl bg-white/60 backdrop-blur-sm shadow-sm border border-white/20 hover:bg-white/80 transition-all duration-300 group"
+          :class="{ 'ring-2 ring-emerald-500 bg-white/80': notificationPanelOpen }"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-600 group-hover:text-slate-800 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          <span v-if="hasUnreadNotifications" class="absolute -top-2 -right-2 h-5 w-5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg animate-bounce">
+            {{ notificationCount > 9 ? '9+' : notificationCount }}
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+
+        <!-- Mobile Search Bar -->
+        <div v-if="showMobileSearch" class="md:hidden mb-6">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -156,14 +130,13 @@
               v-model="searchQuery" 
               type="text" 
               placeholder="Search messages..." 
-              class="w-full pl-10 pr-10 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all shadow-sm"
+              class="w-full pl-12 pr-12 py-4 bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all shadow-sm text-base"
             />
             <button 
-              v-if="searchQuery" 
-              @click="searchQuery = ''" 
-              class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+              @click="toggleSearch" 
+              class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -171,105 +144,83 @@
         </div>
         
         <!-- Chat Card -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden relative mb-6 flex flex-col h-[calc(100vh-320px)] border border-slate-200">
-          <!-- Chat Header -->
-          <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-emerald-50 to-teal-50">
-            <div class="flex items-center gap-4">
-              <div class="bg-gradient-to-br from-emerald-500 to-teal-600 p-3 rounded-xl shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-              </div>
-              <div>
-                <h2 class="text-xl font-bold text-slate-800">Eco-Mist Chat</h2>
-                <p class="text-sm text-slate-600">Community Discussion</p>
-              </div>
-            </div>
-            <div class="flex items-center gap-4">
-              <div class="flex items-center gap-2 px-3 py-2 bg-white rounded-full shadow-sm border border-slate-200">
-                <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                <span class="text-sm font-medium text-slate-700">{{ onlineUsers }} Online</span>
-              </div>
-              <button 
-                @click="showChatInfo = !showChatInfo" 
-                class="p-2 rounded-xl hover:bg-white/50 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </button>
-            </div>
-          </div>
+        <div class="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl overflow-hidden relative mb-6 flex flex-col border border-white/20" 
+             :style="{ height: isMobile ? 'calc(100vh - 200px)' : 'calc(100vh - 100px)' }">
           
           <!-- Chat Info Sidebar -->
           <div 
             v-if="showChatInfo" 
-            class="absolute right-0 top-0 bottom-0 w-80 bg-white border-l border-slate-200 z-20 overflow-y-auto transform transition-transform duration-300"
+            class="absolute right-0 top-0 bottom-0 w-full md:w-80 bg-white/95 backdrop-blur-xl border-l border-slate-200/50 z-20 overflow-y-auto transform transition-all duration-300"
             :class="{ 'translate-x-0': showChatInfo, 'translate-x-full': !showChatInfo }"
           >
             <div class="p-6">
-              <div class="flex justify-between items-center mb-6">
-                <h3 class="font-bold text-slate-800">Chat Information</h3>
-                <button @click="showChatInfo = false" class="text-slate-500 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div class="flex justify-between items-center mb-8">
+                <h3 class="font-bold text-slate-800 text-xl">Chat Information</h3>
+                <button @click="showChatInfo = false" class="text-slate-500 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100/50 transition-all duration-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
               
               <div class="mb-8">
-                <h4 class="text-sm font-semibold text-slate-500 mb-4 uppercase tracking-wide">Active Users</h4>
+                <h4 class="text-sm font-bold text-slate-500 mb-4 uppercase tracking-wider">Active Users</h4>
                 <div class="space-y-3">
-                  <div v-for="(user, index) in activeUsers" :key="index" class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center text-sm font-bold">
+                  <div v-for="(user, index) in activeUsers" :key="index" class="flex items-center gap-3 p-4 rounded-2xl hover:bg-slate-50/50 transition-all duration-200 cursor-pointer">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center text-sm font-bold shadow-lg">
                       {{ getInitials(user.name) }}
                     </div>
                     <div>
-                      <div class="text-sm font-medium text-slate-800">{{ user.name }}</div>
-                      <div class="text-xs text-slate-500">{{ user.status }}</div>
+                      <div class="text-base font-semibold text-slate-800">{{ user.name }}</div>
+                      <div class="text-sm text-slate-500">{{ user.status }}</div>
                     </div>
                   </div>
                 </div>
               </div>
               
               <div class="mb-8">
-                <h4 class="text-sm font-semibold text-slate-500 mb-4 uppercase tracking-wide">Shared Files</h4>
-                <div class="space-y-2">
-                  <div v-for="(file, index) in sharedFiles" :key="index" class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                    <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </div>
-                    <a href="#" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium truncate">{{ file.name }}</a>
+                <h4 class="text-sm font-bold text-slate-500 mb-4 uppercase tracking-wider">Chat Settings</h4>
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between p-4 rounded-2xl hover:bg-slate-50/50 transition-all duration-200">
+                    <span class="text-base font-semibold text-slate-700">Notifications</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" v-model="chatSettings.notifications" class="sr-only peer" @change="toggleNotifications">
+                      <div class="w-14 h-8 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300/50 rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-600 shadow-inner"></div>
+                    </label>
+                  </div>
+                  <div class="flex items-center justify-between p-4 rounded-2xl hover:bg-slate-50/50 transition-all duration-200">
+                    <span class="text-base font-semibold text-slate-700">Sound Effects</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" v-model="chatSettings.soundEffects" class="sr-only peer">
+                      <div class="w-14 h-8 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300/50 rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-600 shadow-inner"></div>
+                    </label>
+                  </div>
+                  <div class="flex items-center justify-between p-4 rounded-2xl hover:bg-slate-50/50 transition-all duration-200">
+                    <span class="text-base font-semibold text-slate-700">Read Receipts</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" v-model="chatSettings.readReceipts" class="sr-only peer">
+                      <div class="w-14 h-8 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300/50 rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-600 shadow-inner"></div>
+                    </label>
                   </div>
                 </div>
               </div>
-              
-              <div>
-                <h4 class="text-sm font-semibold text-slate-500 mb-4 uppercase tracking-wide">Chat Settings</h4>
-                <div class="space-y-4">
-                  <div class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                    <span class="text-sm font-medium text-slate-700">Notifications</span>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" v-model="chatSettings.notifications" class="sr-only peer" @change="toggleNotifications">
-                      <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
-                    </label>
-                  </div>
-                  <div class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                    <span class="text-sm font-medium text-slate-700">Sound Effects</span>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" v-model="chatSettings.soundEffects" class="sr-only peer">
-                      <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
-                    </label>
-                  </div>
-                  <div class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                    <span class="text-sm font-medium text-slate-700">Read Receipts</span>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" v-model="chatSettings.readReceipts" class="sr-only peer">
-                      <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
-                    </label>
-                  </div>
+
+              <!-- New Quick Actions Section -->
+              <div class="mb-8">
+                <h4 class="text-sm font-bold text-slate-500 mb-4 uppercase tracking-wider">Quick Actions</h4>
+                <div class="grid grid-cols-2 gap-3">
+                  <button @click="exportChat" class="p-4 bg-blue-50 hover:bg-blue-100 rounded-2xl transition-all duration-200 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span class="text-xs font-semibold text-blue-700">Export</span>
+                  </button>
+                  <button @click="clearChat" class="p-4 bg-red-50 hover:bg-red-100 rounded-2xl transition-all duration-200 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span class="text-xs font-semibold text-red-700">Clear</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -277,137 +228,132 @@
           
           <!-- Messages Container -->
           <div 
-            class="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-slate-50/50 to-white" 
+            class="flex-1 overflow-y-auto p-4 md:p-6 bg-gradient-to-b from-slate-50/30 via-white/20 to-slate-50/30 backdrop-blur-sm" 
             ref="messagesContainer" 
             @scroll="handleScroll"
             @click="hideMessageOptions"
           >
-            <div v-if="loadingMessages" class="flex justify-center items-center py-8">
-              <div class="flex items-center gap-3">
-                <div class="spinner-sm">
+            <div v-if="loadingMessages" class="flex justify-center items-center py-12">
+              <div class="flex items-center gap-4">
+                <div class="spinner-enhanced">
                   <div></div><div></div><div></div><div></div><div></div><div></div>
                 </div>
-                <span class="text-slate-500 font-medium">Loading messages...</span>
+                <span class="text-slate-500 font-semibold text-base">Loading messages...</span>
               </div>
             </div>
             
-            <div v-if="errorLoadingMessages" class="text-center p-6 bg-red-50 border border-red-200 rounded-xl text-red-600">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div v-if="errorLoadingMessages" class="text-center p-8 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-2xl text-red-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <p class="font-medium mb-3">Error loading messages</p>
-              <button @click="retryLoadMessages" class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-medium transition-colors">
+              <p class="font-bold mb-4 text-lg">Error loading messages</p>
+              <button @click="retryLoadMessages" class="px-6 py-3 bg-red-100 text-red-700 rounded-xl hover:bg-red-200 font-semibold transition-all duration-200 shadow-sm">
                 Try Again
               </button>
             </div>
             
             <div v-if="messages.length === 0 && !loadingMessages" class="h-full flex flex-col items-center justify-center text-slate-500">
-              <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div class="w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-3xl flex items-center justify-center mb-6 shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
               </div>
-              <p class="text-lg font-medium mb-2">No messages yet</p>
-              <p class="text-sm">Start the conversation!</p>
+              <p class="text-xl font-bold mb-3">No messages yet</p>
+              <p class="text-base">Start the conversation and connect with others!</p>
             </div>
             
             <div v-for="(msg, index) in filteredMessages" :key="msg.id" 
                  class="mb-6" 
-                 :class="{'mb-2': isGroupedMessage(msg, index)}"
+                 :class="{'mb-3': isGroupedMessage(msg, index)}"
                  :id="`message-${msg.id}`">
               <div class="flex" :class="{'justify-end': msg.userId === user.uid}">
                 <div v-if="msg.userId !== user.uid && !isGroupedMessage(msg, index)" 
-                     class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"
+                     class="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center text-sm md:text-base font-bold mr-3 md:mr-4 flex-shrink-0 cursor-pointer hover:scale-110 transition-all duration-200 shadow-lg"
                      @click="openUserProfile(msg.userId)"
                 >
                   {{ getInitials(msg.username) }}
                 </div>
-                <div v-if="msg.userId === user.uid && !isGroupedMessage(msg, index)" class="w-10 mr-3 flex-shrink-0"></div>
+                <div v-if="msg.userId === user.uid && !isGroupedMessage(msg, index)" class="w-10 md:w-12 mr-3 md:mr-4 flex-shrink-0"></div>
                 
-                <div class="max-w-[75%] relative">
-                  <div v-if="!isGroupedMessage(msg, index)" class="text-xs text-slate-500 mb-2 font-medium">
+                <div class="max-w-[85%] md:max-w-[75%] relative">
+                  <div v-if="!isGroupedMessage(msg, index)" class="text-sm text-slate-500 mb-2 font-semibold">
                     {{ msg.userId === user.uid ? 'You' : msg.username }}
                   </div>
                   <div 
-                    class="rounded-2xl px-4 py-3 inline-block relative shadow-sm border transition-all duration-200 hover:shadow-md" 
-                    :class="msg.userId === user.uid ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-emerald-200' : 'bg-white border-slate-200 text-slate-800'"
+                    class="rounded-3xl px-4 py-3 md:px-6 md:py-4 inline-block relative shadow-lg border transition-all duration-300 hover:shadow-xl hover:scale-[1.02]" 
+                    :class="msg.userId === user.uid ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-white border-emerald-200/50 shadow-emerald-200/50' : 'bg-white/90 backdrop-blur-sm border-slate-200/50 text-slate-800 shadow-slate-200/50'"
                     @contextmenu.prevent="showMessageOptions(msg, $event)"
                     @touchstart="startHold(msg)"
                     @touchend="clearHold"
                     @click.stop="msg.userId !== user.uid && showQuickReactions(msg, $event)"
                   >
-                    <span v-if="editingMessage?.id !== msg.id" class="break-words">
+                    <span v-if="editingMessage?.id !== msg.id" class="break-words text-base md:text-lg leading-relaxed">
                       {{ msg.text }}
                     </span>
                     
                     <!-- Enhanced File Preview -->
-                    <div v-if="msg.fileUrl" class="mt-3">
+                    <div v-if="msg.fileUrl" class="mt-3 md:mt-4">
                       <template v-if="isImageFile(msg.fileUrl)">
                         <img 
                           :src="msg.fileUrl" 
                           alt="Uploaded Image" 
-                          class="max-w-full h-auto rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                          class="max-w-full h-auto rounded-2xl border border-slate-200/50 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
                           @click="openLightbox(msg.fileUrl)"
                         />
                       </template>
                       <template v-else-if="isPdfFile(msg.fileUrl)">
-                        <div class="border border-slate-200 rounded-xl shadow-sm p-4 bg-slate-50">
+                        <div class="border border-slate-200/50 rounded-2xl shadow-lg p-4 md:p-5 bg-slate-50/80 backdrop-blur-sm">
                           <div class="flex items-center justify-between mb-3">
                             <div class="flex items-center">
-                              <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <div class="w-10 h-10 bg-red-100 rounded-2xl flex items-center justify-center mr-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                               </div>
-                              <span class="text-sm font-medium text-slate-700">PDF Document</span>
+                              <span class="text-base font-semibold text-slate-700">PDF Document</span>
                             </div>
                             <div class="flex gap-2">
-                              <button @click="downloadFile(msg.fileUrl)" class="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <button @click="downloadFile(msg.fileUrl)" class="p-2.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl transition-all duration-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                               </button>
-                              <a :href="msg.fileUrl" target="_blank" rel="noopener noreferrer" class="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <a :href="msg.fileUrl" target="_blank" rel="noopener noreferrer" class="p-2.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl transition-all duration-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                 </svg>
                               </a>
                             </div>
                           </div>
-                          <embed 
-                            :src="msg.fileUrl" 
-                            type="application/pdf" 
-                            class="w-full h-64 border border-slate-200 rounded-lg"
-                          />
                         </div>
                       </template>
                       <template v-else-if="isVideoFile(msg.fileUrl)">
                         <video 
                           controls 
                           :src="msg.fileUrl" 
-                          class="w-full h-64 border border-slate-200 rounded-xl shadow-sm"
+                          class="w-full h-48 md:h-64 border border-slate-200/50 rounded-2xl shadow-lg"
                         >
                           Your browser does not support the video tag.
                         </video>
                       </template>
                       <template v-else>
-                        <div class="border border-slate-200 rounded-xl shadow-sm p-3 bg-slate-50 flex items-center justify-between">
+                        <div class="border border-slate-200/50 rounded-2xl shadow-lg p-3 md:p-4 bg-slate-50/80 backdrop-blur-sm flex items-center justify-between">
                           <div class="flex items-center">
-                            <div class="w-8 h-8 bg-slate-200 rounded-lg flex items-center justify-center mr-3">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div class="w-10 h-10 bg-slate-200 rounded-2xl flex items-center justify-center mr-4">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                               </svg>
                             </div>
-                            <span class="text-sm font-medium text-slate-700">{{ getFileName(msg.fileUrl) }}</span>
+                            <span class="text-base font-semibold text-slate-700 truncate">{{ getFileName(msg.fileUrl) }}</span>
                           </div>
                           <div class="flex gap-2">
-                            <button @click="downloadFile(msg.fileUrl)" class="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <button @click="downloadFile(msg.fileUrl)" class="p-2.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl transition-all duration-200">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                               </svg>
                             </button>
-                            <a :href="msg.fileUrl" target="_blank" rel="noopener noreferrer" class="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <a :href="msg.fileUrl" target="_blank" rel="noopener noreferrer" class="p-2.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl transition-all duration-200">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                               </svg>
                             </a>
@@ -416,39 +362,39 @@
                       </template>
                     </div>
                     
-                    <!-- Reactions -->
-                    <div v-if="msg.reactions && Object.keys(msg.reactions).length > 0" class="mt-3 flex flex-wrap gap-2">
+                    <!-- Enhanced Reactions -->
+                    <div v-if="msg.reactions && Object.keys(msg.reactions).length > 0" class="mt-3 md:mt-4 flex flex-wrap gap-2">
                       <div v-for="(count, emoji) in msg.reactions" :key="emoji" 
-                           class="flex items-center gap-1 text-sm rounded-full px-3 py-1 border transition-colors cursor-pointer hover:scale-105"
-                           :class="msg.userId === user.uid ? 'bg-white/20 border-white/30 text-white' : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'">
-                        <span>{{ emoji }}</span>
-                        <span class="font-medium">{{ count }}</span>
+                           class="flex items-center gap-2 text-sm md:text-base rounded-2xl px-3 py-2 border transition-all duration-200 cursor-pointer hover:scale-110 shadow-sm"
+                           :class="msg.userId === user.uid ? 'bg-white/30 border-white/40 text-white backdrop-blur-sm' : 'bg-slate-100/80 border-slate-200/50 text-slate-700 hover:bg-slate-200/80 backdrop-blur-sm'">
+                        <span class="text-lg">{{ emoji }}</span>
+                        <span class="font-bold">{{ count }}</span>
                       </div>
                     </div>
                     
                     <!-- Edit Message Modal -->
                     <div 
-                      class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4"
+                      class="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 p-4"
                       v-if="editingMessage?.id === msg.id" 
                       @click.stop
                     >
-                      <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl p-6 w-full max-w-md">
-                        <h3 class="text-lg font-bold text-slate-800 mb-4">Edit Message</h3>
+                      <div class="bg-white/95 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-lg">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-6">Edit Message</h3>
                         <textarea 
                           v-model="newMessage" 
-                          class="border border-slate-300 rounded-xl px-4 py-3 text-sm w-full min-h-[120px] focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
+                          class="border border-slate-300/50 rounded-2xl px-4 py-3 md:px-6 md:py-4 text-base w-full min-h-[120px] md:min-h-[140px] focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none bg-white/80 backdrop-blur-sm"
                           placeholder="Edit your message..."
                         ></textarea>
-                        <div class="flex justify-end mt-6 gap-3">
+                        <div class="flex justify-end mt-6 gap-4">
                           <button 
                             @click="cancelEditing()" 
-                            class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-200 transition-colors"
+                            class="px-6 py-3 bg-slate-100/80 text-slate-700 rounded-2xl text-base font-semibold hover:bg-slate-200/80 transition-all duration-200 backdrop-blur-sm"
                           >
                             Cancel
                           </button>
                           <button 
                             @click="saveEditedMessage()" 
-                            class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl text-sm font-medium hover:from-emerald-600 hover:to-teal-700 transition-all shadow-sm"
+                            class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl text-base font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg"
                           >
                             Save Changes
                           </button>
@@ -457,93 +403,93 @@
                     </div>
                   </div>
                   
-                  <!-- Message Options Menu -->
+                  <!-- Enhanced Message Options Menu -->
                   <div v-if="msgOptionsVisible && selectedMessage?.id === msg.id" 
-                    class="absolute top-0 right-0 bg-white border border-slate-200 rounded-xl shadow-xl p-2 flex flex-col gap-1 z-10 min-w-[160px]"
+                    class="absolute top-0 right-0 bg-white/95 backdrop-blur-xl border border-slate-200/50 rounded-2xl shadow-2xl p-3 flex flex-col gap-2 z-10 min-w-[180px] md:min-w-[200px]"
                   >
-                    <button v-if="msg.userId === user.uid" @click="startEditingMessage(msg)" class="text-sm text-slate-700 hover:text-slate-900 p-3 hover:bg-slate-50 rounded-lg transition-colors text-left">
+                    <button v-if="msg.userId === user.uid" @click="startEditingMessage(msg)" class="text-sm md:text-base text-slate-700 hover:text-slate-900 p-3 md:p-4 hover:bg-slate-50/80 rounded-xl transition-all duration-200 text-left">
                       <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
-                        Edit Message
+                        <span class="font-semibold">Edit Message</span>
                       </div>
                     </button>
-                    <button v-if="msg.userId === user.uid" @click="deleteMessage(msg.id)" class="text-sm text-red-600 hover:text-red-800 p-3 hover:bg-red-50 rounded-lg transition-colors text-left">
+                    <button v-if="msg.userId === user.uid" @click="deleteMessage(msg.id)" class="text-sm md:text-base text-red-600 hover:text-red-800 p-3 md:p-4 hover:bg-red-50/80 rounded-xl transition-all duration-200 text-left">
                       <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Delete Message
+                        <span class="font-semibold">Delete Message</span>
                       </div>
                     </button>
-                    <button @click="toggleThread(msg)" class="text-sm text-emerald-600 hover:text-emerald-800 p-3 hover:bg-emerald-50 rounded-lg transition-colors text-left">
+                    <button @click="toggleThread(msg)" class="text-sm md:text-base text-emerald-600 hover:text-emerald-800 p-3 md:p-4 hover:bg-emerald-50/80 rounded-xl transition-all duration-200 text-left">
                       <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
-                        Reply in Thread
+                        <span class="font-semibold">Reply in Thread</span>
                       </div>
                     </button>
-                    <button @click="pinMessage(msg)" class="text-sm text-amber-600 hover:text-amber-800 p-3 hover:bg-amber-50 rounded-lg transition-colors text-left">
+                    <button @click="pinMessage(msg)" class="text-sm md:text-base text-amber-600 hover:text-amber-800 p-3 md:p-4 hover:bg-amber-50/80 rounded-xl transition-all duration-200 text-left">
                       <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                         </svg>
-                        Pin Message
+                        <span class="font-semibold">Pin Message</span>
                       </div>
                     </button>
-                    <button @click="copyToClipboard(msg.text)" class="text-sm text-slate-600 hover:text-slate-800 p-3 hover:bg-slate-50 rounded-lg transition-colors text-left">
+                    <button @click="copyToClipboard(msg.text)" class="text-sm md:text-base text-slate-600 hover:text-slate-800 p-3 md:p-4 hover:bg-slate-50/80 rounded-xl transition-all duration-200 text-left">
                       <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
-                        Copy Text
+                        <span class="font-semibold">Copy Text</span>
                       </div>
                     </button>
-                    <div class="border-t border-slate-200 my-2"></div>
-                    <div class="p-2">
-                      <div class="text-xs text-slate-500 mb-3 font-medium uppercase tracking-wide">Quick Reactions</div>
+                    <div class="border-t border-slate-200/50 my-2"></div>
+                    <div class="p-3">
+                      <div class="text-xs text-slate-500 mb-3 font-bold uppercase tracking-wider">Quick Reactions</div>
                       <div class="flex flex-wrap gap-2">
                         <button v-for="emoji in ['👍', '❤️', '😂', '😮', '😢', '👏']" :key="emoji" 
                                 @click="addReaction(msg.id, emoji)" 
-                                class="text-lg hover:bg-slate-100 rounded-lg p-2 transition-all hover:scale-110">
+                                class="text-xl hover:bg-slate-100/80 rounded-xl p-2 transition-all duration-200 hover:scale-125">
                           {{ emoji }}
                         </button>
                       </div>
                     </div>
                   </div>
                   
-                  <div class="text-xs text-slate-400 mt-2 text-right flex items-center justify-end gap-2">
-                    <span>{{ formatTimestamp(msg.timestamp) }}</span>
-                    <span v-if="msg.edited" class="italic text-slate-400">(edited)</span>
-                    <span v-if="chatSettings.readReceipts && msg.read && msg.userId === user.uid" class="text-emerald-500">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div class="text-sm text-slate-400 mt-2 text-right flex items-center justify-end gap-3">
+                    <span class="font-medium">{{ formatTimestamp(msg.timestamp) }}</span>
+                    <span v-if="msg.edited" class="italic text-slate-400 bg-slate-100/50 px-2 py-1 rounded-lg text-xs">(edited)</span>
+                    <span v-if="chatSettings.readReceipts && msg.readBy && msg.readBy[user.uid] && msg.userId === user.uid" class="text-emerald-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                       </svg>
                     </span>
                   </div>
                   
-                  <!-- Threaded Replies -->
-                  <div v-if="msg.showThread" class="mt-4 ml-6 border-l-2 border-emerald-200 pl-4 bg-slate-50/50 rounded-r-xl p-4">
-                    <div v-for="reply in msg.replies" :key="reply.id" class="mb-3">
-                      <div class="text-xs text-slate-500 font-medium mb-1">{{ reply.username }}</div>
-                      <div class="bg-white rounded-xl px-4 py-3 text-sm text-slate-800 shadow-sm border border-slate-200">
+                  <!-- Enhanced Threaded Replies -->
+                  <div v-if="msg.showThread" class="mt-4 md:mt-6 ml-4 md:ml-8 border-l-4 border-emerald-300/50 pl-4 md:pl-6 bg-gradient-to-r from-slate-50/50 to-white/30 rounded-r-2xl p-4 md:p-6 backdrop-blur-sm">
+                    <div v-for="reply in msg.replies" :key="reply.id" class="mb-4">
+                      <div class="text-sm text-slate-500 font-semibold mb-2">{{ reply.username }}</div>
+                      <div class="bg-white/90 backdrop-blur-sm rounded-2xl px-4 py-3 md:px-6 md:py-4 text-sm md:text-base text-slate-800 shadow-lg border border-slate-200/50">
                         {{ reply.text }}
                       </div>
-                      <div class="text-xs text-slate-400 mt-1">{{ formatTimestamp(reply.timestamp) }}</div>
+                      <div class="text-xs text-slate-400 mt-2 font-medium">{{ formatTimestamp(reply.timestamp) }}</div>
                     </div>
-                    <div class="mt-4 flex gap-3">
+                    <div class="mt-6 flex gap-3">
                       <input 
                         v-model="msg.newReply" 
                         type="text" 
                         placeholder="Write a reply..." 
-                        class="flex-1 px-4 py-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
+                        class="flex-1 px-4 py-3 md:px-6 md:py-4 border border-slate-300/50 rounded-2xl text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white/80 backdrop-blur-sm"
                         @keyup.enter="addReply(msg)"
                       />
                       <button 
                         @click="addReply(msg)" 
-                        class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl text-sm font-medium hover:from-emerald-600 hover:to-teal-700 transition-all shadow-sm"
+                        class="px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl text-sm md:text-base font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg"
                       >
                         Reply
                       </button>
@@ -553,39 +499,39 @@
               </div>
             </div>
             
-            <!-- Typing Indicators -->
-            <div v-if="typingUsers.length > 0" class="mt-4">
-              <div v-for="user in typingUsers" :key="user.id" class="flex items-center mb-3">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-slate-400 to-slate-600 text-white flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0">
+            <!-- Enhanced Typing Indicators -->
+            <div v-if="typingUsers.length > 0" class="mt-6">
+              <div v-for="user in typingUsers" :key="user.id" class="flex items-center mb-4">
+                <div class="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br from-slate-400 to-slate-600 text-white flex items-center justify-center text-sm md:text-base font-bold mr-3 md:mr-4 flex-shrink-0 shadow-lg">
                   {{ user.initials }}
                 </div>
-                <div class="bg-white border border-slate-200 rounded-2xl px-4 py-3 inline-flex items-center shadow-sm">
-                  <div class="flex gap-1 mr-3">
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
+                <div class="bg-white/90 backdrop-blur-sm border border-slate-200/50 rounded-3xl px-4 py-3 md:px-6 md:py-4 inline-flex items-center shadow-lg">
+                  <div class="flex gap-1 mr-3 md:mr-4">
+                    <div class="typing-dot-enhanced"></div>
+                    <div class="typing-dot-enhanced"></div>
+                    <div class="typing-dot-enhanced"></div>
                   </div>
-                  <span class="text-sm text-slate-500 font-medium">{{ user.name }} is typing...</span>
+                  <span class="text-sm md:text-base text-slate-500 font-semibold">{{ user.name }} is typing...</span>
                 </div>
               </div>
             </div>
           </div>
           
-          <!-- Quick Reactions Popup -->
+          <!-- Enhanced Quick Reactions Popup -->
           <div 
             v-if="quickReactionsVisible && selectedMessage" 
             id="quick-reactions"
-            class="fixed bg-white rounded-xl shadow-xl p-4 z-50 border border-slate-200"
+            class="fixed bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 md:p-6 z-50 border border-white/20"
             @click.stop
           >
             <div class="flex flex-col">
-              <div class="text-sm text-slate-500 mb-3 font-medium">Quick Reactions</div>
-              <div class="flex gap-3">
+              <div class="text-sm md:text-base text-slate-500 mb-3 md:mb-4 font-bold">Quick Reactions</div>
+              <div class="flex gap-3 md:gap-4">
                 <button 
                   v-for="emoji in ['👍', '❤️', '😂', '😮', '😢', '👏']" 
                   :key="emoji" 
                   @click="addReaction(selectedMessage.id, emoji); quickReactionsVisible = false; selectedMessage = null;" 
-                  class="text-2xl hover:bg-slate-100 rounded-xl p-3 transition-all hover:scale-110"
+                  class="text-2xl md:text-3xl hover:bg-slate-100/80 rounded-2xl p-3 md:p-4 transition-all duration-200 hover:scale-125 shadow-sm"
                 >
                   {{ emoji }}
                 </button>
@@ -593,58 +539,58 @@
             </div>
           </div>
           
-          <!-- Message Input -->
-          <div class="p-6 border-t border-slate-100 bg-white">
+          <!-- Enhanced Message Input -->
+          <div class="p-4 md:p-6 border-t border-slate-100/50 bg-white/80 backdrop-blur-sm">
             <div class="flex flex-col gap-4">
-              <!-- File Preview -->
-              <div v-if="fileToSend" class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between">
+              <!-- Enhanced File Preview -->
+              <div v-if="fileToSend" class="bg-gradient-to-r from-slate-50/80 to-white/60 border border-slate-200/50 rounded-2xl p-4 md:p-5 flex items-center justify-between backdrop-blur-sm shadow-sm">
                 <div class="flex items-center">
-                  <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center mr-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div class="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center mr-4 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <span class="text-sm font-medium text-slate-700 truncate max-w-[200px]">{{ getFileName(fileToSend) }}</span>
+                  <span class="text-base font-semibold text-slate-700 truncate max-w-[200px] md:max-w-[300px]">{{ getFileName(fileToSend) }}</span>
                 </div>
-                <button @click="fileToSend = null" class="text-slate-500 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-200 transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button @click="fileToSend = null" class="text-slate-500 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-200/50 transition-all duration-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
               
-              <div class="flex gap-3">
+              <div class="flex gap-3 md:gap-4">
                 <div class="relative flex-1">
                   <textarea 
                     v-model="newMessage" 
                     @keyup.enter.exact="editingMessage ? saveEditedMessage() : sendMessage()" 
                     @input="handleTyping"
                     @focus="handleFocus"
-                    placeholder="Type a message..." 
-                    class="w-full px-4 py-3 pr-12 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all resize-none bg-white shadow-sm"
-                    :class="{'h-12': !isMultiline, 'h-24': isMultiline}"
+                    placeholder="Type your message..." 
+                    class="w-full px-4 py-3 md:px-6 md:py-4 pr-12 md:pr-16 border border-slate-300/50 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 resize-none bg-white/80 backdrop-blur-sm shadow-sm text-base md:text-lg"
+                    :class="{'h-12 md:h-14': !isMultiline, 'h-24 md:h-28': isMultiline}"
                     rows="1"
                   ></textarea>
-                  <div class="absolute right-3 bottom-3 flex gap-1">
+                  <div class="absolute right-3 md:right-4 bottom-3 md:bottom-4 flex gap-2">
                     <button 
                       @click="showEmojiPicker = !showEmojiPicker"
-                      class="text-slate-500 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors"
+                      class="text-slate-500 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100/50 transition-all duration-200"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </button>
                   </div>
                   
-                  <!-- Emoji Picker -->
-                  <div v-if="showEmojiPicker" class="absolute bottom-14 right-0 bg-white border border-slate-200 rounded-xl shadow-xl p-4 z-10 emoji-picker">
-                    <div class="text-sm font-medium text-slate-700 mb-3">Choose an emoji</div>
-                    <div class="grid grid-cols-8 gap-2 max-h-48 overflow-y-auto">
+                  <!-- Enhanced Emoji Picker -->
+                  <div v-if="showEmojiPicker" class="absolute bottom-16 md:bottom-20 right-0 bg-white/95 backdrop-blur-xl border border-slate-200/50 rounded-2xl shadow-2xl p-4 md:p-6 z-10 emoji-picker">
+                    <div class="text-sm md:text-base font-bold text-slate-700 mb-3 md:mb-4">Choose an emoji</div>
+                    <div class="grid grid-cols-6 md:grid-cols-8 gap-2 md:gap-3 max-h-48 md:max-h-56 overflow-y-auto">
                       <button 
                         v-for="emoji in commonEmojis" 
                         :key="emoji" 
                         @click="addEmojiToMessage(emoji)"
-                        class="text-xl p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                        class="text-xl md:text-2xl p-2 md:p-3 hover:bg-slate-100/80 rounded-xl transition-all duration-200 hover:scale-125"
                       >
                         {{ emoji }}
                       </button>
@@ -660,18 +606,18 @@
                 />
                 <button 
                   @click="triggerFileInput"
-                  class="px-4 py-3 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-colors shadow-sm"
+                  class="px-4 py-3 md:px-5 md:py-4 bg-slate-100/80 text-slate-600 rounded-2xl hover:bg-slate-200/80 transition-all duration-200 shadow-sm backdrop-blur-sm hover:scale-105"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                   </svg>
                 </button>
                 <button 
                   @click="sendMessage" 
                   :disabled="!newMessage.trim() && !fileToSend"
-                  class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm font-medium"
+                  class="px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg font-semibold hover:scale-105 disabled:hover:scale-100"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
                 </button>
@@ -682,36 +628,98 @@
       </main>
     </div>
 
-    <!-- Image Lightbox -->
-    <div v-if="lightboxImage" class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50" @click="lightboxImage = null">
-      <div class="relative max-w-4xl w-full">
-        <button @click.stop="lightboxImage = null" class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full p-3 text-white hover:bg-white/40 transition-colors">
+    <!-- Enhanced Notification Panel -->
+    <div 
+      v-if="notificationPanelOpen"
+      class="fixed right-2 md:right-4 top-16 md:top-24 w-[calc(100vw-1rem)] md:w-96 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 z-50 notification-panel"
+    >
+      <div class="p-4 md:p-6 border-b border-slate-100/50">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-slate-800 text-lg md:text-xl">Notifications</h3>
+          <div class="flex gap-3">
+            <button 
+              @click="markAllNotificationsAsRead"
+              class="text-sm text-emerald-600 hover:text-emerald-700 font-semibold px-3 py-1.5 rounded-lg hover:bg-emerald-50/80 transition-all duration-200"
+            >
+              Mark all read
+            </button>
+            <button 
+              @click="clearAllNotifications"
+              class="text-sm text-slate-500 hover:text-slate-700 font-semibold px-3 py-1.5 rounded-lg hover:bg-slate-50/80 transition-all duration-200"
+            >
+              Clear all
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="max-h-96 md:max-h-[28rem] overflow-y-auto">
+        <div v-if="notifications.length === 0" class="p-8 md:p-12 text-center text-slate-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          <p class="text-lg font-semibold">No notifications yet</p>
+          <p class="text-sm mt-1">You're all caught up!</p>
+        </div>
+        <div v-for="notification in notifications" :key="notification.id" 
+             @click="handleNotificationClick(notification)"
+             class="p-4 md:p-5 border-b border-slate-50/50 hover:bg-slate-50/50 cursor-pointer transition-all duration-200"
+             :class="{ 'bg-emerald-50/50': !notification.read }"
+        >
+          <div class="flex items-start gap-3 md:gap-4">
+            <div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center shadow-sm"
+                 :class="getNotificationTypeClass(notification.type)"
+            >
+              <svg v-if="notification.type === 'message'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              <svg v-else-if="notification.type === 'mention'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm md:text-base font-semibold text-slate-800 truncate">{{ notification.title }}</p>
+              <p class="text-sm md:text-base text-slate-600 mt-1 leading-relaxed">{{ notification.message }}</p>
+              <p class="text-xs md:text-sm text-slate-400 mt-2 font-medium">{{ formatTimestamp(notification.timestamp) }}</p>
+            </div>
+            <div v-if="!notification.read" class="w-3 h-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex-shrink-0 shadow-sm"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced Image Lightbox -->
+    <div v-if="lightboxImage" class="fixed inset-0 bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 z-50" @click="lightboxImage = null">
+      <div class="relative max-w-6xl w-full">
+        <button @click.stop="lightboxImage = null" class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-white hover:bg-white/40 transition-all duration-200 shadow-lg">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <img :src="lightboxImage" class="max-h-[80vh] max-w-full mx-auto object-contain rounded-xl" alt="Enlarged image" />
+        <img :src="lightboxImage" class="max-h-[85vh] max-w-full mx-auto object-contain rounded-2xl shadow-2xl" alt="Enlarged image" />
       </div>
     </div>
 
-    <!-- Toast Notification -->
+    <!-- Enhanced Toast Notification -->
     <div 
       v-if="toast.show" 
-      class="fixed bottom-6 right-6 px-6 py-4 rounded-xl shadow-xl z-50 flex items-center max-w-sm border backdrop-blur-sm"
+      class="fixed bottom-4 md:bottom-6 right-4 md:right-6 px-6 py-4 md:px-8 md:py-5 rounded-2xl shadow-2xl z-50 flex items-center max-w-sm md:max-w-md border backdrop-blur-xl"
       :class="{
-        'bg-emerald-50/90 text-emerald-800 border-emerald-200': toast.type === 'success',
-        'bg-red-50/90 text-red-800 border-red-200': toast.type === 'error',
-        'bg-blue-50/90 text-blue-800 border-blue-200': toast.type === 'info',
-        'bg-slate-50/90 text-slate-800 border-slate-200': toast.type === 'loading'
+        'bg-emerald-50/95 text-emerald-800 border-emerald-200/50': toast.type === 'success',
+        'bg-red-50/95 text-red-800 border-red-200/50': toast.type === 'error',
+        'bg-blue-50/95 text-blue-800 border-blue-200/50': toast.type === 'info',
+        'bg-slate-50/95 text-slate-800 border-slate-200/50': toast.type === 'loading'
       }"
     >
       <div class="flex items-center">
-        <div v-if="toast.type === 'loading'" class="spinner-sm mr-3">
+        <div v-if="toast.type === 'loading'" class="spinner-enhanced mr-4">
           <div></div><div></div><div></div><div></div><div></div><div></div>
         </div>
         <svg 
           v-else-if="toast.type === 'success'" 
-          class="h-5 w-5 mr-3 flex-shrink-0" 
+          class="h-6 w-6 mr-4 flex-shrink-0" 
           xmlns="http://www.w3.org/2000/svg" 
           viewBox="0 0 20 20" 
           fill="currentColor"
@@ -720,7 +728,7 @@
         </svg>
         <svg 
           v-else-if="toast.type === 'error'" 
-          class="h-5 w-5 mr-3 flex-shrink-0" 
+          class="h-6 w-6 mr-4 flex-shrink-0" 
           xmlns="http://www.w3.org/2000/svg" 
           viewBox="0 0 20 20" 
           fill="currentColor"
@@ -729,35 +737,35 @@
         </svg>
         <svg 
           v-else-if="toast.type === 'info'" 
-          class="h-5 w-5 mr-3 flex-shrink-0" 
+          class="h-6 w-6 mr-4 flex-shrink-0" 
           xmlns="http://www.w3.org/2000/svg" 
           viewBox="0 0 20 20" 
           fill="currentColor"
         >
           <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
         </svg>
-        <span class="font-medium">{{ toast.message }}</span>
+        <span class="font-semibold text-sm md:text-base">{{ toast.message }}</span>
       </div>
     </div>
 
-    <!-- Browser Notification Permission Request -->
-    <div v-if="showNotificationPermissionRequest" class="fixed bottom-6 left-6 bg-white border border-slate-200 rounded-xl shadow-xl p-6 w-80 z-50">
+    <!-- Enhanced Browser Notification Permission Request -->
+    <div v-if="showNotificationPermissionRequest" class="fixed bottom-4 md:bottom-6 left-4 md:left-6 bg-white/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl p-6 md:p-8 w-[calc(100vw-2rem)] md:w-96 z-50">
       <div class="flex items-start">
-        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="w-14 h-14 md:w-16 md:h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mr-4 md:mr-6 flex-shrink-0 shadow-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 md:h-8 md:w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
         </div>
         <div>
-          <h3 class="font-semibold text-slate-800 mb-2">Enable Notifications</h3>
-          <p class="text-sm text-slate-600 mb-4">
+          <h3 class="font-bold text-slate-800 mb-3 text-lg md:text-xl">Enable Notifications</h3>
+          <p class="text-sm md:text-base text-slate-600 mb-4 md:mb-6 leading-relaxed">
             Stay updated with messages, mentions, and reactions by enabling browser notifications.
           </p>
-          <div class="flex gap-3">
-            <button @click="requestNotificationPermission" class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-sm font-medium rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all">
+          <div class="flex gap-3 md:gap-4">
+            <button @click="requestNotificationPermission" class="px-5 py-3 md:px-6 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-sm md:text-base font-semibold rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg">
               Enable
             </button>
-            <button @click="dismissPermissionRequest" class="px-4 py-2 bg-slate-100 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-200 transition-colors">
+            <button @click="dismissPermissionRequest" class="px-5 py-3 md:px-6 bg-slate-100/80 text-slate-700 text-sm md:text-base font-semibold rounded-xl hover:bg-slate-200/80 transition-all duration-200 backdrop-blur-sm">
               Not Now
             </button>
           </div>
@@ -775,25 +783,20 @@ import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, endBefore
 import { debounce } from 'lodash';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
+// Mobile state
+const showMobileSearch = ref(false);
+const isMobile = ref(false);
+
 // Dashboard state
 const role = ref("user");
 const username = ref("");
-const notificationCount = ref(3);
-const showLogoutModal = ref(false);
-const sidebarOpen = ref(true);
-const userMenuOpen = ref(false);
-const isMobile = ref(false);
-const userMenuRef = ref(null);
-const isDarkMode = ref(false);
+const notificationCount = ref(5);
 const showChatInfo = ref(false);
 const collapsePinned = ref(false);
 const lightboxImage = ref(null);
 const showEmojiPicker = ref(false);
 const isMultiline = ref(false);
 const profileImageUrl = ref("");
-const status = ref("active");
-const lastLogin = ref(new Date());
-const loggingOut = ref(false);
 const toast = ref({ show: false, message: '', type: 'success' });
 
 // Notification state
@@ -810,6 +813,7 @@ const user = ref(null);
 const messages = ref([]);
 const newMessage = ref("");
 const editingMessage = ref(null);
+
 const fileToSend = ref(null);
 const typingUsers = ref([]);
 const messagesContainer = ref(null);
@@ -817,7 +821,7 @@ const isTyping = ref(false);
 const selectedMessage = ref(null);
 const msgOptionsVisible = ref(false);
 let holdTimeout = null;
-const onlineUsers = ref(5);
+const onlineUsers = ref();
 const quickReactionsVisible = ref(false);
 
 // Error handling states
@@ -833,16 +837,9 @@ const chatSettings = ref({
 
 // Sample data for demo
 const activeUsers = ref([
-  { name: "John Doe", status: "Online" },
-  { name: "Jane Smith", status: "Away" },
-  { name: "Bob Johnson", status: "Online" },
-  { name: "Alice Brown", status: "Busy" }
 ]);
 
 const sharedFiles = ref([
-  { name: "project-proposal.pdf" },
-  { name: "meeting-notes.docx" },
-  { name: "screenshot.png" }
 ]);
 
 // Common emojis
@@ -855,6 +852,17 @@ const commonEmojis = [
 const router = useRouter();
 const route = useRoute();
 const currentRoute = computed(() => route.path);
+
+// Mobile functions
+const toggleSearch = () => {
+  showMobileSearch.value = !showMobileSearch.value;
+  if (showMobileSearch.value) {
+    nextTick(() => {
+      const searchInput = document.querySelector('input[placeholder="Search messages, users, or files..."]');
+      if (searchInput) searchInput.focus();
+    });
+  }
+};
 
 // Toggle notification panel
 const toggleNotificationPanel = () => {
@@ -1009,7 +1017,7 @@ const handleClickOutside = (event) => {
   }
 };
 
-// Fetch messages in real-time
+// Fetch messages in real-time with Firebase rules compliance
 const fetchMessages = () => {
   loadingMessages.value = true;
   const q = query(collection(db, "messages"), orderBy("timestamp", "desc"), limit(50));
@@ -1058,17 +1066,35 @@ const fetchMessages = () => {
   });
 };
 
-// Mark messages as read
+// Mark messages as read - compliant with Firebase rules
 const markMessagesAsRead = async (msgs) => {
-  if (!user.value) return;
-  
+  if (!user.value?.uid) {
+    console.warn("Not authenticated — cannot mark read.");
+    return;
+  }
+
   for (const msg of msgs) {
-    if (msg.userId !== user.value.uid && !msg.read) {
+    const uid = user.value.uid;
+
+    const alreadyMarked = msg.readBy && msg.readBy[uid];
+    const isNotSender = msg.userId !== uid;
+
+    if (isNotSender && !alreadyMarked) {
+      const docRef = doc(db, "messages", msg.id);
+      const updatePayload = {
+        [`readBy.${uid}`]: {
+          timestamp: new Date(),
+          name: username.value || user.value.displayName || "Anonymous"
+        }
+      };
+
+      console.log("Sending updateDoc with:", updatePayload);
+
       try {
-        const docRef = doc(db, "messages", msg.id);
-        await updateDoc(docRef, { read: true });
+        await updateDoc(docRef, updatePayload);
+        console.log("✅ Marked as read:", msg.id);
       } catch (error) {
-        console.error("Error marking message as read:", error);
+        console.error("❌ Error marking message as read:", error);
       }
     }
   }
@@ -1131,7 +1157,8 @@ const sendMessage = async () => {
     username: username.value || user.value.displayName || "Anonymous",
     timestamp: new Date(),
     edited: false,
-    read: false
+    readBy: {},
+    reactions: {}
   };
   
   if (isOnline.value) {
@@ -1241,6 +1268,34 @@ const handleResize = () => {
   checkIfMobile();
 };
 
+// New enhanced functions
+const exportChat = () => {
+  const chatData = messages.value.map(msg => ({
+    username: msg.username,
+    text: msg.text,
+    timestamp: formatTimestamp(msg.timestamp)
+  }));
+  
+  const dataStr = JSON.stringify(chatData, null, 2);
+  const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+  
+  const exportFileDefaultName = `chat-export-${new Date().toISOString().split('T')[0]}.json`;
+  
+  const linkElement = document.createElement('a');
+  linkElement.setAttribute('href', dataUri);
+  linkElement.setAttribute('download', exportFileDefaultName);
+  linkElement.click();
+  
+  showToast('Chat exported successfully!', 'success');
+};
+
+const clearChat = () => {
+  if (confirm('Are you sure you want to clear all messages? This action cannot be undone.')) {
+    messages.value = [];
+    showToast('Chat cleared', 'info');
+  }
+};
+
 // Initialize component
 let unsubscribeMessages = null;
 onMounted(async () => {
@@ -1272,22 +1327,6 @@ onMounted(async () => {
         timestamp: new Date(Date.now() - 1000 * 60 * 5),
         read: false
       },
-      {
-        id: 2,
-        type: 'mention',
-        title: 'You were mentioned',
-        message: 'Jane Smith mentioned you in a message.',
-        timestamp: new Date(Date.now() - 1000 * 60 * 15),
-        read: false
-      },
-      {
-        id: 3,
-        type: 'reaction',
-        title: 'New reaction',
-        message: 'Robert Johnson reacted with 👍 to your message.',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60),
-        read: true
-      }
     ];
     updateNotificationBadge();
   }, 1000);
@@ -1321,27 +1360,30 @@ const startEditingMessage = (msg) => {
   msgOptionsVisible.value = false;
 };
 
-// Save edited message and hide options
+// Save edited message - compliant with Firebase rules
 const saveEditedMessage = async () => {
   if (!editingMessage.value) return;
+
+  const msg = messages.value.find(m => m.id === editingMessage.value.id);
+  if (!msg || msg.userId !== user.value?.uid) {
+    showToast("You are not allowed to edit this message", "error");
+    return;
+  }
+
   try {
     const docRef = doc(db, "messages", editingMessage.value.id);
-    await updateDoc(docRef, { 
+    await updateDoc(docRef, {
       text: newMessage.value,
       edited: true
     });
-    const index = messages.value.findIndex((msg) => msg.id === editingMessage.value.id);
-    if (index !== -1) {
-      messages.value[index].text = newMessage.value;
-      messages.value[index].edited = true;
-    }
+    
     editingMessage.value = null;
     newMessage.value = "";
     msgOptionsVisible.value = false;
     selectedMessage.value = null;
     showToast("Message updated successfully", "success");
   } catch (error) {
-    console.error("Error editing message:", error);
+    console.error("Error updating message:", error);
     showToast("Failed to update message", "error");
   }
 };
@@ -1354,8 +1396,14 @@ const cancelEditing = () => {
   selectedMessage.value = null;
 };
 
-// Delete a message
+// Delete a message - compliant with Firebase rules
 const deleteMessage = async (messageId) => {
+  const msg = messages.value.find(m => m.id === messageId);
+  if (!msg || msg.userId !== user.value?.uid) {
+    showToast("You are not allowed to delete this message", "error");
+    return;
+  }
+
   try {
     const docRef = doc(db, "messages", messageId);
     await deleteDoc(docRef);
@@ -1475,34 +1523,31 @@ const showQuickReactions = (msg, event) => {
 // Define the file input reference
 const fileInput = ref(null);
 
-// Add reaction to a message
+// Add reaction to a message - compliant with Firebase rules
 const addReaction = async (messageId, emoji) => {
+  const msg = messages.value.find(m => m.id === messageId);
+  if (!msg || !user.value) return;
+
   try {
     const docRef = doc(db, "messages", messageId);
-    const message = messages.value.find((msg) => msg.id === messageId);
-    if (!message) return;
-
-    const reactions = message.reactions || {};
-    reactions[emoji] = (reactions[emoji] || 0) + 1;
-
-    await updateDoc(docRef, { reactions });
     
-    message.reactions = reactions;
-    
-    if (message.userId !== user.value?.uid) {
-      addNotification({
-        id: Date.now(),
-        type: 'reaction',
-        title: 'New reaction',
-        message: `${username.value} reacted with ${emoji} to your message.`,
-        timestamp: new Date(),
-        read: false,
-        messageId: messageId
+    if (msg.userId === user.uid) {
+      const reactions = msg.reactions || {};
+      reactions[emoji] = (reactions[emoji] || 0) + 1;
+      await updateDoc(docRef, { reactions });
+      msg.reactions = reactions;
+    } else {
+      await updateDoc(docRef, {
+        [`reactions.${user.value.uid}`]: emoji
       });
+      
+      if (!msg.reactions) msg.reactions = {};
+      msg.reactions[user.value.uid] = emoji;
     }
     
     msgOptionsVisible.value = false;
     selectedMessage.value = null;
+    showToast("Reaction added", "success");
   } catch (error) {
     console.error("Error adding reaction:", error);
     showToast("Failed to add reaction", "error");
@@ -1551,9 +1596,7 @@ const unpinMessage = (messageId) => {
 
 // Simulate typing indicators for multiple users
 const simulateTypingUsers = () => {
-  typingUsers.value = [
-    { id: 1, name: "Jane Smith", initials: "JS" }
-  ];
+  typingUsers.value = [];
   setTimeout(() => {
     typingUsers.value = [];
   }, 3000);
@@ -1713,53 +1756,49 @@ const downloadFile = (fileUrl) => {
 </script>
 
 <style scoped>
-/* Spinner Animation */
-.spinner {
-  width: 44px;
-  height: 44px;
-  animation: spinner-rotation 2s infinite ease;
+/* Enhanced Spinner Animation */
+.spinner-enhanced {
+  width: 32px;
+  height: 32px;
+  animation: spinner-rotation 1.5s infinite ease;
   transform-style: preserve-3d;
 }
 
-.spinner > div {
-  background-color: rgba(16, 185, 129, 0.2);
+.spinner-enhanced > div {
+  background-color: rgba(16, 185, 129, 0.3);
   height: 100%;
   position: absolute;
   width: 100%;
   border: 2px solid #10b981;
+  border: 2px solid #10b981;
 }
 
-.spinner div:nth-of-type(1) {
-  transform: translateZ(-22px) rotateY(180deg);
+.spinner-enhanced div:nth-of-type(1) {
+  transform: translateZ(-16px) rotateY(180deg);
 }
 
-.spinner div:nth-of-type(2) {
+.spinner-enhanced div:nth-of-type(2) {
   transform: rotateY(-270deg) translateX(50%);
   transform-origin: top right;
 }
 
-.spinner div:nth-of-type(3) {
+.spinner-enhanced div:nth-of-type(3) {
   transform: rotateY(270deg) translateX(-50%);
   transform-origin: center left;
 }
 
-.spinner div:nth-of-type(4) {
+.spinner-enhanced div:nth-of-type(4) {
   transform: rotateX(90deg) translateY(-50%);
   transform-origin: top center;
 }
 
-.spinner div:nth-of-type(5) {
+.spinner-enhanced div:nth-of-type(5) {
   transform: rotateX(-90deg) translateY(50%);
   transform-origin: bottom center;
 }
 
-.spinner div:nth-of-type(6) {
-  transform: translateZ(22px);
-}
-
-.spinner-sm {
-  width: 24px;
-  height: 24px;
+.spinner-enhanced div:nth-of-type(6) {
+  transform: translateZ(16px);
 }
 
 @keyframes spinner-rotation {
@@ -1774,78 +1813,141 @@ const downloadFile = (fileUrl) => {
   }
 }
 
-/* Typing indicator */
-.typing-dot {
+/* Enhanced typing indicator */
+.typing-dot-enhanced {
   display: inline-block;
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background-color: #10b981;
+  background: linear-gradient(45deg, #10b981, #14b8a6);
   margin: 0 2px;
-  animation: typing 1.4s infinite ease-in-out both;
+  animation: typing-enhanced 1.6s infinite ease-in-out both;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
 }
 
-.typing-dot:nth-child(1) {
+.typing-dot-enhanced:nth-child(1) {
   animation-delay: 0s;
 }
 
-.typing-dot:nth-child(2) {
-  animation-delay: 0.2s;
+.typing-dot-enhanced:nth-child(2) {
+  animation-delay: 0.3s;
 }
 
-.typing-dot:nth-child(3) {
-  animation-delay: 0.4s;
+.typing-dot-enhanced:nth-child(3) {
+  animation-delay: 0.6s;
 }
 
-@keyframes typing {
+@keyframes typing-enhanced {
   0%, 80%, 100% {
-    transform: scale(0.6);
-    opacity: 0.4;
+    transform: scale(0.7) translateY(0);
+    opacity: 0.5;
   }
   40% {
-    transform: scale(1);
+    transform: scale(1.1) translateY(-8px);
     opacity: 1;
   }
 }
 
-/* Highlight a message */
+/* Enhanced highlight animation */
 .highlight-message {
-  animation: highlight-pulse 2s ease-in-out;
+  animation: highlight-pulse-enhanced 2.5s ease-in-out;
 }
 
-@keyframes highlight-pulse {
+@keyframes highlight-pulse-enhanced {
   0%, 100% {
     background-color: transparent;
+    transform: scale(1);
+  }
+  25% {
+    background-color: rgba(16, 185, 129, 0.15);
+    transform: scale(1.02);
   }
   50% {
-    background-color: rgba(16, 185, 129, 0.2);
+    background-color: rgba(16, 185, 129, 0.25);
+    transform: scale(1.03);
+  }
+  75% {
+    background-color: rgba(16, 185, 129, 0.15);
+    transform: scale(1.02);
   }
 }
 
-/* Smooth transitions */
+/* Enhanced smooth transitions */
 .transition-all {
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Focus styles for accessibility */
+/* Enhanced focus styles for accessibility */
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible {
   outline: 2px solid #10b981;
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
 }
 
-/* Responsive adjustments */
+/* Enhanced scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.5);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #10b981, #14b8a6);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #059669, #0d9488);
+}
+
+/* Enhanced mobile optimizations */
 @media (max-width: 768px) {
-  .w-80 {
-    width: calc(100vw - 2rem);
-    max-width: 20rem;
+  .w-96 {
+    width: calc(100vw - 1rem);
+    max-width: 24rem;
+  }
+  
+  /* Enhanced touch-friendly button sizes */
+  button {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  /* Better text readability on mobile */
+  .text-xs {
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+  
+  /* Enhanced spacing for mobile */
+  .gap-1 {
+    gap: 0.5rem;
+  }
+  
+  .gap-2 {
+    gap: 0.75rem;
+  }
+  
+  /* Enhanced mobile message bubbles */
+  .rounded-3xl {
+    border-radius: 1.5rem;
   }
 }
 
-/* Reduced motion support */
+/* Force chat message font color to black for better visibility */
+.rounded-3xl.px-4,
+.rounded-3xl.px-6 {
+  color: #000 !important;
+}
+
+/* Enhanced reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .spinner, .spinner-sm {
+  .spinner-enhanced {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
   }
@@ -1854,13 +1956,63 @@ textarea:focus-visible {
     transition-duration: 0.001ms !important;
   }
   
-  .typing-dot {
+  .typing-dot-enhanced {
     animation: none !important;
   }
   
   .highlight-message {
     animation: none !important;
-    background-color: rgba(16, 185, 129, 0.1);
+    background-color: rgba(16, 185, 129, 0.2);
+  }
+  
+  .hover\:scale-105:hover,
+  .hover\:scale-110:hover,
+  .hover\:scale-125:hover {
+    transform: none !important;
+  }
+}
+
+/* Enhanced high contrast mode support */
+@media (prefers-contrast: high) {
+  .bg-slate-50 {
+    background-color: white;
+  }
+  
+  .text-slate-600 {
+    color: black;
+  }
+  
+  .border-slate-200 {
+    border-color: black;
+  }
+  
+  .backdrop-blur-sm,
+  .backdrop-blur-xl {
+    backdrop-filter: none;
+  }
+}
+
+/* Enhanced dark mode support */
+@media (prefers-color-scheme: dark) {
+  .bg-gradient-to-br {
+    background: linear-gradient(to bottom right, #064e3b, #065f46, #047857);
+  }
+  
+  .bg-white {
+    background-color: rgba(30, 41, 59, 0.9);
+  }
+  
+  .text-slate-800 {
+    color: #e2e8f0;
+  }
+  
+  .text-slate-600 {
+    color: #cbd5e1;
+  }
+  
+  .border-slate-200 {
+    border-color: rgba(71, 85, 105, 0.5);
   }
 }
 </style>
+

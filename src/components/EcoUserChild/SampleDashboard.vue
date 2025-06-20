@@ -1,711 +1,496 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex flex-col">
-    
-    <!-- Main Content Area with Sidebar -->
-    <div class="flex flex-1 overflow-hidden">
-      <!-- Main Content -->
-      <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
-        <!-- Page Header -->
-        <div class="mb-6">
-          <h1 class="text-2xl font-bold text-gray-800">Dashboard Overview</h1>
-          <p class="text-gray-600">Welcome back, {{ username }}! Here's your system overview.</p>
-        </div>
-
-        <!-- Overview Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div 
-            v-for="(feature, index) in features" 
-            :key="index" 
-            class="bg-white rounded-lg shadow-sm p-4 border-l-4"
-            :class="feature.color"
-          >
-            <div class="flex justify-between items-start">
-              <div>
-                <p class="text-sm font-medium text-gray-500">{{ feature.name }}</p>
-                <h3 class="text-xl font-bold text-gray-800 mt-1">{{ feature.value }}</h3>
-                <p class="text-gray-600 text-xs mt-1">{{ feature.description }}</p>
-              </div>
-              <div class="p-2 rounded-lg" :class="feature.bgColor">
-                <svg :class="feature.iconClass" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="feature.iconPath" />
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <!-- Header with improved styling -->
+    <header class="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10">
+      <div class="px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+              Dashboard Overview
+            </h1>
+            <p class="text-slate-600 mt-1 flex items-center gap-2">
+              <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+              Welcome back, {{ username }}!
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <div class="w-3 h-3 bg-red-500 rounded-full absolute -top-1 -right-1 animate-pulse"></div>
+              <div class="p-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors cursor-pointer">
+                <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7H4l5-5v5z"></path>
                 </svg>
               </div>
             </div>
           </div>
         </div>
+      </div>
+    </header>
 
-        <!-- Main Content Tabs -->
-        <div class="bg-white rounded-lg shadow-sm mb-6">
-          <div class="border-b">
-            <nav class="flex -mb-px">
-              <button 
-                v-for="tab in dashboardTabs" 
-                :key="tab.id"
-                @click="currentDashboardTab = tab.id" 
-                :class="[
-                  'py-4 px-6 font-medium text-sm border-b-2 focus:outline-none',
-                  currentDashboardTab === tab.id 
-                    ? 'border-emerald-500 text-emerald-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                ]"
-              >
-                {{ tab.name }}
+    <!-- Enhanced Overview Cards with animations -->
+    <section class="p-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div
+          v-for="(card, index) in dashboardCards"
+          :key="index"
+          class="group bg-white/70 backdrop-blur-sm rounded-xl shadow-sm hover:shadow-lg border border-slate-200/50 p-6 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+          :class="card.hoverClass"
+          :style="{ animationDelay: `${index * 100}ms` }"
+        >
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <p class="text-sm font-medium text-slate-500 mb-1">{{ card.title }}</p>
+              <h2 class="text-3xl font-bold text-slate-800 mb-2">
+                <span class="counter" :data-target="card.value">{{ card.displayValue }}</span>
+              </h2>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-2 py-1 rounded-full" :class="card.changeClass">
+                  {{ card.change }}
+                </span>
+              </div>
+            </div>
+            <div class="p-3 rounded-lg transition-colors duration-300" :class="card.iconBg">
+              <component :is="card.icon" class="w-6 h-6 transition-colors duration-300" :class="card.iconColor" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Enhanced Charts Section -->
+    <section class="px-6 pb-6">
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <!-- Expense Chart -->
+        <div class="bg-white/70 backdrop-blur-sm rounded-xl shadow-sm border border-slate-200/50 p-6 hover:shadow-lg transition-shadow duration-300">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-semibold text-slate-800">Expense Breakdown</h3>
+            <div class="flex gap-2">
+              <button class="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
               </button>
-            </nav>
+            </div>
           </div>
-
-          <!-- Tab Content -->
-          <div class="p-6">
-            <!-- Quick Access Tab -->
-            <div v-if="currentDashboardTab === 'quick-access'">
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div 
-                  v-for="(functionality, index) in functionalities" 
-                  :key="index" 
-                  class="bg-gray-100 rounded-lg p-4 flex items-center space-x-4 hover:bg-gray-200 cursor-pointer transition-colors relative"
-                  @click="navigateTo(functionality.route)"
-                >
-                  <div class="p-3 rounded-lg" :class="functionality.bgColor">
-                    <svg :class="functionality.iconClass" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="functionality.iconPath" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 class="text-lg font-medium text-gray-800">{{ functionality.name }}</h3>
-                    <p class="text-sm text-gray-600">{{ functionality.description }}</p>
-                  </div>
-                  
-                  <!-- Loading Spinner (shown when loading) -->
-                  <div v-if="functionality.loading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 rounded-lg">
-                    <div class="spinner">
-                      <div></div>
-                      <div></div>
-                      <div></div>
-                      <div></div>
-                      <div></div>
-                      <div></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Recent Activity Tab -->
-            <div v-if="currentDashboardTab === 'recent-activity'">
-              <div class="space-y-4">
-                <div v-if="recentActivities.length === 0" class="text-center py-8 text-gray-500">
-                  No recent activities to display
-                </div>
-                <div 
-                  v-for="(activity, index) in recentActivities" 
-                  :key="index" 
-                  class="bg-gray-50 rounded-lg p-4 flex items-start space-x-4"
-                >
-                  <div :class="[
-                    'p-2 rounded-full',
-                    activity.type === 'login' ? 'bg-blue-100 text-blue-600' :
-                    activity.type === 'data' ? 'bg-green-100 text-green-600' :
-                    activity.type === 'system' ? 'bg-purple-100 text-purple-600' :
-                    'bg-gray-100 text-gray-600'
-                  ]">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path 
-                        stroke-linecap="round" 
-                        stroke-linejoin="round" 
-                        stroke-width="2" 
-                        :d="activity.type === 'login' ? 'M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1' :
-                            activity.type === 'data' ? 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' :
-                            activity.type === 'system' ? 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' :
-                            'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'"
-                      />
-                    </svg>
-                  </div>
-                  <div class="flex-1">
-                    <div class="flex justify-between">
-                      <p class="font-medium text-gray-800">{{ activity.title }}</p>
-                      <span class="text-xs text-gray-500">{{ formatDate(activity.timestamp) }}</span>
-                    </div>
-                    <p class="text-sm text-gray-600 mt-1">{{ activity.description }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- System Status Tab -->
-            <div v-if="currentDashboardTab === 'system-status'">
-              <div class="space-y-6">
-                <!-- System Health -->
-                <div>
-                  <h3 class="text-lg font-medium text-gray-800 mb-4">System Health</h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div v-for="(metric, index) in systemMetrics" :key="index" class="bg-gray-50 rounded-lg p-4">
-                      <div class="flex justify-between items-center mb-2">
-                        <span class="text-sm font-medium text-gray-700">{{ metric.name }}</span>
-                        <span :class="[
-                          'text-xs px-2 py-0.5 rounded-full',
-                          metric.status === 'good' ? 'bg-green-100 text-green-800' :
-                          metric.status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        ]">
-                          {{ metric.statusText }}
-                        </span>
-                      </div>
-                      <div class="w-full bg-gray-200 rounded-full h-2.5">
-                        <div 
-                          class="h-2.5 rounded-full" 
-                          :class="[
-                            metric.status === 'good' ? 'bg-green-600' :
-                            metric.status === 'warning' ? 'bg-yellow-500' : 'bg-red-600'
-                          ]"
-                          :style="{ width: `${metric.value}%` }"
-                        ></div>
-                      </div>
-                      <p class="text-xs text-gray-500 mt-2">{{ metric.description }}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Upcoming Maintenance -->
-                <div>
-                  <h3 class="text-lg font-medium text-gray-800 mb-4">Upcoming Maintenance</h3>
-                  <div class="bg-gray-50 rounded-lg p-4">
-                    <div v-if="maintenanceEvents.length === 0" class="text-center py-4 text-gray-500">
-                      No scheduled maintenance events
-                    </div>
-                    <div v-else class="space-y-4">
-                      <div v-for="(event, index) in maintenanceEvents" :key="index" class="flex items-start space-x-4">
-                        <div class="bg-blue-100 text-blue-600 p-2 rounded-full">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                        <div class="flex-1">
-                          <div class="flex justify-between">
-                            <p class="font-medium text-gray-800">{{ event.title }}</p>
-                            <span class="text-xs text-gray-500">{{ formatDate(event.date) }}</span>
-                          </div>
-                          <p class="text-sm text-gray-600 mt-1">{{ event.description }}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div class="relative h-64">
+            <canvas ref="expenseChart" class="max-h-full"></canvas>
           </div>
         </div>
 
-        <!-- Quick Links -->
-        <div class="bg-white rounded-lg shadow-sm p-6">
-          <h2 class="text-xl font-bold text-gray-800 mb-4">Quick Links</h2>
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <a 
-              v-for="(link, index) in quickLinks" 
-              :key="index" 
-              href="#"
-              @click.prevent="handleQuickLink(link)"
-              class="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors relative"
+        <!-- Disease Trends Chart -->
+        <div class="bg-white/70 backdrop-blur-sm rounded-xl shadow-sm border border-slate-200/50 p-6 hover:shadow-lg transition-shadow duration-300">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-semibold text-slate-800">Disease Trends</h3>
+            <div class="flex gap-2">
+              <select class="text-sm border border-slate-200 rounded-lg px-3 py-1 bg-white">
+                <option>Last 7 days</option>
+                <option>Last 30 days</option>
+                <option>Last 90 days</option>
+              </select>
+            </div>
+          </div>
+          <div class="relative h-64">
+            <canvas ref="diseaseChart" class="max-h-full"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Enhanced Alerts Section -->
+    <section class="px-6 pb-6">
+      <div class="bg-white/70 backdrop-blur-sm rounded-xl shadow-sm border border-slate-200/50 p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-semibold text-slate-800 flex items-center gap-2">
+            <div class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+            System Alerts
+          </h3>
+          <button class="text-sm text-slate-500 hover:text-slate-700 transition-colors">
+            View All
+          </button>
+        </div>
+        <div class="space-y-3">
+          <div
+            v-for="(alert, index) in alerts"
+            :key="index"
+            class="flex items-start gap-4 p-4 rounded-lg border-l-4 transition-all duration-300 hover:shadow-sm"
+            :class="alert.bgClass + ' ' + alert.borderClass"
+          >
+            <div class="p-2 rounded-lg" :class="alert.iconBg">
+              <component :is="alert.icon" class="w-4 h-4" :class="alert.iconColor" />
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-medium" :class="alert.textClass">{{ alert.message }}</p>
+              <p class="text-xs text-slate-500 mt-1">{{ alert.timestamp }}</p>
+            </div>
+            <button class="p-1 hover:bg-slate-100 rounded transition-colors">
+              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Enhanced Activity Log and Performance in Grid -->
+    <section class="px-6 pb-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Activity Log -->
+        <div class="bg-white/70 backdrop-blur-sm rounded-xl shadow-sm border border-slate-200/50 p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-semibold text-slate-800">Recent Activity</h3>
+            <button class="text-sm text-blue-600 hover:text-blue-700 transition-colors">
+              View All
+            </button>
+          </div>
+          <div class="space-y-4 max-h-64 overflow-y-auto custom-scrollbar">
+            <div
+              v-for="(log, index) in activityLogs.slice(0, 5)"
+              :key="index"
+              class="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors"
             >
-              <div :class="[link.iconBg, 'p-3 rounded-full mb-2']">
-                <svg :class="link.iconColor" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="link.iconPath" />
-                </svg>
+              <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-slate-700 leading-relaxed">{{ log.message }}</p>
+                <p class="text-xs text-slate-500 mt-1">
+                  {{ log.timestamp.toDate().toLocaleString() }}
+                </p>
               </div>
-              <span class="text-sm font-medium text-gray-700 text-center">{{ link.name }}</span>
-              
-              <!-- Loading Spinner (shown when loading) -->
-              <div v-if="link.loading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 rounded-lg">
-                <div class="spinner">
-                  <div></div>
-                  <div></div>
-                  <div></div>
-                  <div></div>
-                  <div></div>
-                  <div></div>
-                </div>
-              </div>
-            </a>
+            </div>
           </div>
         </div>
-      </main>
-    </div>
+
+        <!-- System Performance -->
+        <div class="bg-white/70 backdrop-blur-sm rounded-xl shadow-sm border border-slate-200/50 p-6">
+          <h3 class="text-xl font-semibold text-slate-800 mb-6">System Performance</h3>
+          <div class="space-y-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-green-100 rounded-lg">
+                  <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-slate-700">Misting Frequency</p>
+                  <p class="text-xs text-slate-500">Daily cycles</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-2xl font-bold text-slate-800">{{ performance.mistingFrequency }}</p>
+                <p class="text-xs text-green-600">+2 from yesterday</p>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-blue-100 rounded-lg">
+                  <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-slate-700">Active Devices</p>
+                  <p class="text-xs text-slate-500">Currently online</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-2xl font-bold text-slate-800">{{ performance.activeDevices }}</p>
+                <p class="text-xs text-blue-600">All systems operational</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount, inject } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, addDoc } from "firebase/firestore"; 
-import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { ref, onMounted, nextTick } from 'vue'
+import { auth, db } from '../../firebase'
+import { doc, getDoc, collection, getCountFromServer, query, where, getDocs, orderBy } from 'firebase/firestore'
+import { UserIcon, CalendarIcon, DatabaseIcon, TrendingUpIcon, AlertTriangleIcon, InfoIcon } from 'lucide-vue-next'
+import { Chart, registerables } from 'chart.js'
 
-// Router
-const router = useRouter();
-const route = useRoute();
-const currentRoute = computed(() => route.path);
+Chart.register(...registerables)
 
-// State variables
-const username = ref("");
-const role = ref("");
-const lastLogin = ref(new Date());
-const sidebarOpen = ref(true);
-const userMenuOpen = ref(false);
-const notificationCount = ref(2);
-const isMobile = ref(false);
-const userMenuRef = ref(null);
-const showLogoutModal = ref(false);
-const showFeedbackModal = ref(false);
-const feedbackType = ref('suggestion');
-const feedbackMessage = ref('');
-const currentDashboardTab = ref('quick-access');
-const toast = ref({ show: false, message: '', type: 'success' });
-const submittingFeedback = ref(false);
-const loggingOut = ref(false);
-const notifications = ref([]);
-const loadingNotifications = ref(true);
-
-// Dashboard tabs
-const dashboardTabs = [
-  { id: 'quick-access', name: 'Quick Access' },
-  { id: 'recent-activity', name: 'Recent Activity' },
-  { id: 'system-status', name: 'System Status' }
-];
-
-// Feature cards
-const features = [
+const username = ref('')
+const dashboardCards = ref([
   { 
-    name: "Sensor Readings", 
-    value: "24", 
-    description: "Active sensors monitoring your system", 
-    color: "border-blue-500", 
-    bgColor: "bg-blue-100", 
-    iconClass: "text-blue-600", 
-    iconPath: "M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" 
+    title: 'Transactions', 
+    value: 0, 
+    displayValue: '...', 
+    change: '+12%',
+    changeClass: 'bg-green-100 text-green-700',
+    hoverClass: 'hover:border-emerald-200',
+    iconBg: 'bg-emerald-100 group-hover:bg-emerald-200',
+    iconColor: 'text-emerald-600',
+    icon: DatabaseIcon 
   },
   { 
-    name: "System Health", 
-    value: "98%", 
-    description: "Overall system performance", 
-    color: "border-green-500", 
-    bgColor: "bg-green-100", 
-    iconClass: "text-green-600", 
-    iconPath: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" 
-  },
-  { 
-    name: "Crop Analysis", 
-    value: "3", 
-    description: "Pending crop analyses", 
-    color: "border-purple-500", 
-    bgColor: "bg-purple-100", 
-    iconClass: "text-purple-600", 
-    iconPath: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" 
-  },
-  { 
-    name: "Alerts", 
-    value: "0", 
-    description: "No active alerts in your system", 
-    color: "border-yellow-500", 
-    bgColor: "bg-yellow-100", 
-    iconClass: "text-yellow-600", 
-    iconPath: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
-  }
-];
-
-// System functionalities with loading state
-const functionalities = ref([
-  { 
-    name: "Financial Management", 
-    description: "Manage your finances effectively", 
-    route: "/financial-management", 
-    bgColor: "bg-green-100", 
-    iconClass: "text-green-600", 
-    iconPath: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z",
-    loading: false
-  },
-  { 
-    name: "Sensor Data", 
-    description: "View and analyze sensor data", 
-    route: "/sensor_data", 
-    bgColor: "bg-blue-100", 
-    iconClass: "text-blue-600", 
-    iconPath: "M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z",
-    loading: false
-  },
-  { 
-    name: "Crop Disease Detector", 
-    description: "Detect crop diseases using AI", 
-    route: "/model", 
-    bgColor: "bg-purple-100", 
-    iconClass: "text-purple-600", 
-    iconPath: "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z",
-    loading: false
-  },
-  { 
-    name: "User Profile", 
-    description: "View and edit your profile", 
-    route: "/profile-display", 
-    bgColor: "bg-indigo-100", 
-    iconClass: "text-indigo-600", 
-    iconPath: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
-    loading: false
-  },
-  { 
-    name: "Messenger", 
-    description: "Chat with support and team", 
-    route: "/messenger", 
-    bgColor: "bg-pink-100", 
-    iconClass: "text-pink-600", 
-    iconPath: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z",
-    loading: false
-  },
-  { 
-    name: "Settings", 
-    description: "Configure system settings", 
-    route: "/settings", 
-    bgColor: "bg-gray-100", 
-    iconClass: "text-gray-600", 
-    iconPath: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z",
-    loading: false
-  }
-]);
-
-// Recent activities
-const recentActivities = ref([
-  {
-    type: 'login',
-    title: 'System Login',
-    description: 'You logged in to the system',
-    timestamp: new Date(Date.now() - 1000 * 60 * 30) // 30 minutes ago
-  },
-  {
-    type: 'data',
-    title: 'Sensor Data Updated',
-    description: 'Sensor data was successfully updated',
-    timestamp: new Date(Date.now() - 1000 * 60 * 120) // 2 hours ago
-  },
-  {
-    type: 'system',
-    title: 'System Update',
-    description: 'System was updated to version 2.4.1',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24) // 1 day ago
-  }
-]);
-
-// System metrics
-const systemMetrics = ref([
-  {
-    name: 'CPU Usage',
-    value: 32,
-    status: 'good',
-    statusText: 'Normal',
-    description: 'Current CPU usage is within normal range'
-  },
-  {
-    name: 'Memory Usage',
-    value: 68,
-    status: 'warning',
-    statusText: 'Moderate',
-    description: 'Memory usage is higher than usual'
-  },
-  {
-    name: 'Disk Space',
-    value: 45,
-    status: 'good',
-    statusText: 'Normal',
-    description: 'Plenty of disk space available'
-  },
-  {
-    name: 'Network',
-    value: 92,
-    status: 'good',
-    statusText: 'Excellent',
-    description: 'Network connectivity is excellent'
-  }
-]);
-
-// Maintenance events
-const maintenanceEvents = ref([
-  {
-    title: 'System Update',
-    description: 'Scheduled system update for performance improvements',
-    date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3) // 3 days from now
-  },
-  {
-    title: 'Database Maintenance',
-    description: 'Routine database optimization and cleanup',
-    date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) // 7 days from now
-  }
-]);
-
-// Quick links with loading state
-const quickLinks = ref([
-  {
-    name: 'Documentation',
-    url: '#',
-    iconBg: 'bg-blue-100',
+    title: 'Budget Entries', 
+    value: 0, 
+    displayValue: '...', 
+    change: '+8%',
+    changeClass: 'bg-blue-100 text-blue-700',
+    hoverClass: 'hover:border-blue-200',
+    iconBg: 'bg-blue-100 group-hover:bg-blue-200',
     iconColor: 'text-blue-600',
-    iconPath: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
-    loading: false
+    icon: CalendarIcon 
   },
-  {
-    name: 'Support',
-    url: '#',
-    iconBg: 'bg-green-100',
-    iconColor: 'text-green-600',
-    iconPath: 'M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z',
-    loading: false
-  },
-  {
-    name: 'Reports',
-    url: '#',
-    iconBg: 'bg-purple-100',
+  { 
+    title: 'Analyses Run', 
+    value: 0, 
+    displayValue: '...', 
+    change: '+15%',
+    changeClass: 'bg-purple-100 text-purple-700',
+    hoverClass: 'hover:border-purple-200',
+    iconBg: 'bg-purple-100 group-hover:bg-purple-200',
     iconColor: 'text-purple-600',
-    iconPath: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-    loading: false
+    icon: TrendingUpIcon 
   },
-  {
-    name: 'Analytics',
-    url: '#',
-    iconBg: 'bg-yellow-100',
-    iconColor: 'text-yellow-600',
-    iconPath: 'M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
-    loading: false
+  { 
+    title: 'Feedbacks', 
+    value: 0, 
+    displayValue: '...', 
+    change: '+5%',
+    changeClass: 'bg-amber-100 text-amber-700',
+    hoverClass: 'hover:border-amber-200',
+    iconBg: 'bg-amber-100 group-hover:bg-amber-200',
+    iconColor: 'text-amber-600',
+    icon: UserIcon 
   },
-  {
-    name: 'Settings',
-    url: '#',
-    iconBg: 'bg-gray-100',
-    iconColor: 'text-gray-600',
-    iconPath: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z',
-    loading: false
+])
+
+const alerts = ref([
+  { 
+    message: 'Device Eco-1 missed a scheduled mist.', 
+    timestamp: '2 minutes ago',
+    icon: AlertTriangleIcon,
+    bgClass: 'bg-amber-50',
+    borderClass: 'border-amber-400',
+    textClass: 'text-amber-800',
+    iconBg: 'bg-amber-100',
+    iconColor: 'text-amber-600'
   },
-  {
-    name: 'Help',
-    url: '#',
-    iconBg: 'bg-pink-100',
-    iconColor: 'text-pink-600',
-    iconPath: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z',
-    loading: false
+  { 
+    message: 'High TDS level detected in Eco-2.', 
+    timestamp: '5 minutes ago',
+    icon: AlertTriangleIcon,
+    bgClass: 'bg-red-50',
+    borderClass: 'border-red-400',
+    textClass: 'text-red-800',
+    iconBg: 'bg-red-100',
+    iconColor: 'text-red-600'
   }
-]);
+])
 
+const activityLogs = ref([])
+const performance = ref({ mistingFrequency: 0, activeDevices: 0 })
+const expenseChart = ref(null)
+const diseaseChart = ref(null)
 
-// Firestore setup
-const db = getFirestore();
-
-// Methods
-const getInitials = (name) => {
-  if (!name) return "U";
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-};
-const handleClickOutside = (event) => {
-  if (userMenuRef.value && !userMenuRef.value.contains(event.target)) {
-    userMenuOpen.value = false;
-  }
-};
-
-const checkIfMobile = () => {
-  isMobile.value = window.innerWidth < 768;
-  if (isMobile.value) {
-    sidebarOpen.value = false;
-  } else {
-    // Get saved sidebar state or default to open on desktop
-    const savedState = localStorage.getItem('sidebarOpen');
-    sidebarOpen.value = savedState !== null ? savedState === 'true' : true;
-  }
-};
-
-const navigateTo = (route) => {
-  // Find the functionality and set its loading state
-  const functionality = functionalities.value.find(f => f.route === route);
-  if (functionality) {
-    functionality.loading = true;
-    
-    // Simulate a delay to show the spinner
-    setTimeout(() => {
-      router.push(route);
-      functionality.loading = false;
-    }, 1000);
-  } else {
-    router.push(route);
-  }
-};
-
-const handleQuickLink = (link) => {
-  // Set the loading state for this link
-  link.loading = true;
-  
-  // Simulate a delay to show the spinner
-  setTimeout(() => {
-    // Here you would typically navigate to the link or perform an action
-    console.log(`Clicked on ${link.name}`);
-    showToast(`${link.name} link clicked`, 'success');
-    link.loading = false;
-  }, 1500);
-};
-
-const showToast = (message, type = 'success') => {
-  toast.value = { show: true, message, type };
-  setTimeout(() => {
-    toast.value.show = false;
-  }, 3000);
-};
-
-const closeFeedbackModal = () => {
-  showFeedbackModal.value = false;
-  feedbackMessage.value = '';
-  feedbackType.value = 'suggestion';
-};
-
-
-// Fetch notifications for the user
-const fetchNotifications = () => {
-  loadingNotifications.value = true;
-  const userId = "currentUserId"; // Replace with actual user ID logic
-  const notificationsQuery = query(
-    collection(db, 'feedback_notifications'),
-    where('userId', '==', userId),
-    orderBy('timestamp', 'desc')
-  );
-
-  onSnapshot(notificationsQuery, (snapshot) => {
-    notifications.value = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    loadingNotifications.value = false;
-  }, (error) => {
-    console.error("Error fetching notifications:", error);
-    loadingNotifications.value = false;
-  });
-};
-
-// Format date utility
-const formatDate = (timestamp) => {
-  if (!timestamp) return 'Unknown';
-  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-  return new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short'
-  }).format(date);
-};
-
-// Initialize component
-onMounted(() => {
-  // Check if mobile on initial load
-  checkIfMobile();
-  
-  // Add resize event listener
-  window.addEventListener('resize', handleResize);
-  
-  // Add click outside listener for user menu
-  document.addEventListener('click', handleClickOutside);
-  
-  // Fetch the logged-in user's name
-  const auth = getAuth();
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      username.value = user.displayName || "User";
-      // Set last login time
-      lastLogin.value = new Date();
-    } else {
-      username.value = "Guest";
+// Counter animation function
+const animateCounter = (element, target) => {
+  let current = 0
+  const increment = target / 50
+  const timer = setInterval(() => {
+    current += increment
+    if (current >= target) {
+      current = target
+      clearInterval(timer)
     }
-  });
+    element.textContent = Math.floor(current)
+  }, 20)
+}
 
-  fetchNotifications();
-});
+onMounted(async () => {
+  const user = auth.currentUser
+  if (user) {
+    username.value = user.displayName || user.email
+    const uid = user.uid
 
-// Handle window resize
-const handleResize = () => {
-  checkIfMobile();
-};
+    try {
+      // Fetch counts with error handling
+      const [txSnap, budgetSnap, analysisSnap, feedbackSnap] = await Promise.all([
+        getCountFromServer(collection(db, 'users', uid, 'transactions')),
+        getCountFromServer(collection(db, 'users', uid, 'budgets')),
+        getCountFromServer(query(collection(db, 'analysisHistory'), where('userId', '==', uid))),
+        getCountFromServer(query(collection(db, 'feedback'), where('userId', '==', uid)))
+      ])
 
-// Watch for route changes to close sidebar on mobile
-watch(currentRoute, () => {
-  if (isMobile.value) {
-    sidebarOpen.value = false;
-    document.body.style.overflow = '';
+      // Update card values and animate counters
+      dashboardCards.value[0].value = txSnap.data().count
+      dashboardCards.value[1].value = budgetSnap.data().count
+      dashboardCards.value[2].value = analysisSnap.data().count
+      dashboardCards.value[3].value = feedbackSnap.data().count
+
+      // Animate counters
+      await nextTick()
+      dashboardCards.value.forEach((card, index) => {
+        card.displayValue = card.value
+        const element = document.querySelectorAll('.counter')[index]
+        if (element) {
+          animateCounter(element, card.value)
+        }
+      })
+
+      // Fetch activity logs
+      const logQuery = query(
+  collection(db, 'system_logs'),
+  where('user', '==', auth.currentUser.email),
+  orderBy('timestamp', 'desc')
+)
+
+      const logSnap = await getDocs(logQuery)
+      activityLogs.value = logSnap.docs.map(doc => doc.data())
+
+      // Update performance data
+      performance.value = {
+        mistingFrequency: 12,
+        activeDevices: 4
+      }
+
+      // Render charts with improved styling
+      setTimeout(() => {
+        renderCharts()
+      }, 100)
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
+    }
   }
-  // Close user menu when route changes
-  userMenuOpen.value = false;
-});
+})
+
+const renderCharts = () => {
+  // Enhanced Expense Chart
+  if (expenseChart.value) {
+    new Chart(expenseChart.value, {
+      type: 'doughnut',
+      data: {
+        labels: ['Nutrients', 'Maintenance', 'Energy', 'Other'],
+        datasets: [{
+          data: [30, 25, 35, 10],
+          backgroundColor: [
+            'rgba(16, 185, 129, 0.8)',
+            'rgba(59, 130, 246, 0.8)',
+            'rgba(139, 92, 246, 0.8)',
+            'rgba(245, 158, 11, 0.8)'
+          ],
+          borderColor: [
+            'rgb(16, 185, 129)',
+            'rgb(59, 130, 246)',
+            'rgb(139, 92, 246)',
+            'rgb(245, 158, 11)'
+          ],
+          borderWidth: 2,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              usePointStyle: true,
+              font: {
+                size: 12
+              }
+            }
+          }
+        },
+        cutout: '60%'
+      }
+    })
+  }
+
+  // Enhanced Disease Trends Chart
+  if (diseaseChart.value) {
+    new Chart(diseaseChart.value, {
+      type: 'line',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+          label: 'Fungal Infections',
+          data: [2, 4, 3, 5, 1, 0, 2],
+          borderColor: 'rgb(139, 92, 246)',
+          backgroundColor: 'rgba(139, 92, 246, 0.1)',
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: 'rgb(139, 92, 246)',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        }
+      }
+    })
+  }
+}
 </script>
 
 <style scoped>
-/* Custom styles for the user dashboard */
-.bg-pattern {
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
 }
 
-/* Focus styles for accessibility */
-button:focus-visible,
-a:focus-visible {
-  outline: 2px solid #10b981;
-  outline-offset: 2px;
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 2px;
 }
 
-/* 3D Cube Spinner */
-.spinner {
-  width: 44px;
-  height: 44px;
-  animation: spinner-y0fdc1 2s infinite ease;
-  transform-style: preserve-3d;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
 }
 
-.spinner > div {
-  background-color: rgba(16, 185, 129, 0.2);
-  height: 100%;
-  position: absolute;
-  width: 100%;
-  border: 2px solid #10b981;
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
-.spinner div:nth-of-type(1) {
-  transform: translateZ(-22px) rotateY(180deg);
-}
-
-.spinner div:nth-of-type(2) {
-  transform: rotateY(-270deg) translateX(50%);
-  transform-origin: top right;
-}
-
-.spinner div:nth-of-type(3) {
-  transform: rotateY(270deg) translateX(-50%);
-  transform-origin: center left;
-}
-
-.spinner div:nth-of-type(4) {
-  transform: rotateX(90deg) translateY(-50%);
-  transform-origin: top center;
-}
-
-.spinner div:nth-of-type(5) {
-  transform: rotateX(-90deg) translateY(50%);
-  transform-origin: bottom center;
-}
-
-.spinner div:nth-of-type(6) {
-  transform: translateZ(22px);
-}
-
-/* Smaller spinner for buttons */
-.spinner-sm {
-  width: 24px;
-  height: 24px;
-}
-
-@keyframes spinner-y0fdc1 {
-  0% {
-    transform: rotate(45deg) rotateX(-25deg) rotateY(25deg);
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-
-  50% {
-    transform: rotate(45deg) rotateX(-385deg) rotateY(25deg);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
 
-  100% {
-    transform: rotate(45deg) rotateX(-385deg) rotateY(385deg);
-  }
+.group {
+  animation: fadeInUp 0.6s ease-out forwards;
 }
 </style>
