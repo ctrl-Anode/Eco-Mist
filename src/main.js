@@ -39,12 +39,15 @@ if (localStorage.getItem("darkMode") === "true") {
 }
 
 // Request FCM token
-requestFcmToken().then((token) => {
-  if (token) {
-    console.log("FCM Token received: [TOKEN REDACTED]");
-    // Optionally, send the token to your backend for further use
-  }
-});
+if ('serviceWorker' in navigator) {
+  requestFcmToken().then((token) => {
+    if (token) {
+      console.log("FCM Token received: [TOKEN REDACTED]");
+      // Optionally send to backend
+    }
+  });
+}
+
 
 // Handle incoming messages
 onMessageListener().then((payload) => {
@@ -53,5 +56,6 @@ onMessageListener().then((payload) => {
   const { title, body } = payload.notification;
   app.$toast.info(`${title}: ${body}`);
 });
+
 
 //google authinticator/nodemailer

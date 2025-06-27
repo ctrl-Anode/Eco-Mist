@@ -6,6 +6,7 @@ from PIL import Image
 import io
 import logging
 import firebase_admin
+from firebase_admin import messaging
 from firebase_admin import credentials, auth as firebase_auth
 
 cred = credentials.Certificate("firebase-admin-sdk.json")  # your actual file
@@ -132,6 +133,30 @@ def verify_token(request):
     decoded_token = firebase_auth.verify_id_token(id_token)
     return decoded_token  # includes uid, email, etc.
 
+@app.route('/send-notification', methods=['POST'])
+def send_notification():
+    try:
+        decoded_user = verify_token(request)
+        print(f"🔐 Verified sender: {decoded_user.get('email')}")
+
+        data = request.json
+        fcm_token = data.get('token')
+        title = data.get('title')
+        body = data.get('body')
+
+        message = messaging.Message(
+            notification=messaging.Notification(title=title, body=body),
+            token=fcm_token,
+        )
+
+        response = messaging.send(message)
+        return jsonify({'success': True, 'response': response}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 # Main entry point
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
+#CORS(app, origins=["http://localhost:5173"])  # or your production URL

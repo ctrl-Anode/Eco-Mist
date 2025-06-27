@@ -15,3 +15,7 @@ Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://
 -EcoAuth
 -router
 -Firestore rules
+
+-app.py
+-firebase.js
+-main.js

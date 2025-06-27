@@ -52,21 +52,6 @@ export const logout = async () => {
   }
 };
 
-// Function to request FCM token
-export const requestFcmToken = async () => {
-  try {
-    const token = await getToken(messaging, { vapidKey: "BLcoKHiPfFAMCNTzgqzgo3IXUQNpENK9NKaT-pMOv46ejmxujlFNKNnGXujiAMDdq2K4tYkMydNFu8_lfWcjKLw" });
-    if (token) {
-      console.log("FCM Token received: [TOKEN REDACTED]"); // Updated log message
-      return token;
-    } else {
-      console.warn("No FCM token available. Request permission to generate one.");
-    }
-  } catch (error) {
-    console.error("Error getting FCM token:", error);
-  }
-};
-
 // Ensure `onMessageListener` is correctly defined
 export const onMessageListener = () =>
   new Promise((resolve, reject) => {
@@ -94,32 +79,70 @@ export const sendSmsNotification = async (phoneNumber, message) => {
   }
 };
 
-// Function to send FCM notification
-export const sendFcmNotification = async (fcmToken, title, body) => {
+export async function requestFcmToken() {
   try {
-    const response = await fetch("https://fcm.googleapis.com/fcm/send", {
+    if (!('serviceWorker' in navigator)) {
+      throw new Error("Service workers are not supported in this browser.");
+    }
+
+    // Register SW first
+    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    console.log('✅ Service worker registered:', registration);
+
+    // Wait for service worker to be ready
+    const readyRegistration = await navigator.serviceWorker.ready;
+    console.log('✅ Service worker ready:', readyRegistration);
+
+    const token = await getToken(messaging, {
+      vapidKey: 'BLcoKHiPfFAMCNTzgqzgo3IXUQNpENK9NKaT-pMOv46ejmxujlFNKNnGXujiAMDdq2K4tYkMydNFu8_lfWcjKLw',
+      serviceWorkerRegistration: readyRegistration
+    });
+
+    if (token) {
+      console.log('✅ FCM Token:', token);
+      return token;
+    } else {
+      console.warn('⚠️ No FCM token received');
+      return null;
+    }
+
+  } catch (err) {
+    console.error('❌ Error getting FCM token:', err);
+    return null;
+  }
+};
+
+export const sendSecureNotification = async (fcmToken, title, body) => {
+  try {
+    const user = getAuth().currentUser;
+    if (!user) throw new Error("User not authenticated");
+
+    const idToken = await user.getIdToken();
+
+    const response = await fetch("http://localhost:5000/send-notification", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `key=YOUR_SERVER_KEY` // Replace with your Firebase server key
+        "Authorization": `Bearer ${idToken}`
       },
-      body: JSON.stringify({
-        to: fcmToken,
-        notification: {
-          title: title,
-          body: body
-        }
-      })
+      body: JSON.stringify({ token: fcmToken, title, body })
     });
 
-    if (response.ok) {
-      console.log("FCM notification sent successfully");
-    } else {
-      console.error("Error sending FCM notification:", await response.text());
-    }
-  } catch (error) {
-    console.error("Error sending FCM notification:", error.message);
+    const result = await response.json();
+    console.log("🔔 Notification Result:", result);
+    return result;
+
+  } catch (err) {
+    console.error("❌ Error sending secure notification:", err);
+    return null;
   }
 };
+
+//imports
+// import { sendSecureNotification } from '@/firebase';
+
+// await sendSecureNotification(token, "Eco-Mist Update", "Pump activated automatically.");
+
+
 
 export { ref, onValue, set };
