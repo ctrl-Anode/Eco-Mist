@@ -6,12 +6,12 @@
     tabindex="0"
   >
     <div class="flex justify-between items-center py-2 sm:py-3 md:py-4 relative">
-      <!-- Mobile Menu Toggle - always visible -->
+      <!-- Mobile Menu Toggle -->
       <button
         class="md:hidden absolute left-3 sm:left-4 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-green-800 bg-green-100 rounded-lg active:bg-green-200 touch-manipulation"
         @click="toggleMobileMenu"
         aria-label="Toggle menu"
-        aria-expanded="mobileMenuOpen"
+        :aria-expanded="mobileMenuOpen"
         aria-controls="mobile-menu"
         tabindex="0"
       >
@@ -26,7 +26,7 @@
         </svg>
       </button>
 
-      <!-- Branding (centered on mobile) -->
+      <!-- Branding -->
       <div class="flex items-center gap-2 sm:gap-3 mx-auto md:mx-0">
         <img src="/eco-mist-logo.png" alt="Eco-Mist Logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain" loading="lazy" />
         <span class="text-green-800 text-lg sm:text-xl md:text-2xl font-bold">Eco-Mist</span>
@@ -38,7 +38,7 @@
           v-for="link in navLinks"
           :key="link.id"
           :href="link.href"
-          @click.prevent="scrollToSection(link.href.slice(1))"
+          @click="handleNavClick(link)"
           class="text-green-800 hover:text-green-600 transition-colors font-medium text-sm lg:text-base relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-green-600 after:transition-all hover:after:w-full"
           role="menuitem"
           tabindex="0"
@@ -48,7 +48,7 @@
       </div>
     </div>
 
-    <!-- Mobile Nav Menu (always placed just below the header) -->
+    <!-- Mobile Nav Menu -->
     <transition
       name="mobile-menu"
       enter-active-class="transition duration-300 ease-out"
@@ -70,14 +70,13 @@
             v-for="link in navLinks"
             :key="link.id"
             :href="link.href"
-            @click="closeMobileMenu(link.href.slice(1))"
+            @click="handleNavClick(link)"
             class="text-green-800 py-2 hover:text-green-600 transition-colors font-medium active:bg-green-50 rounded-lg px-3 touch-manipulation"
             role="menuitem"
             tabindex="0"
           >
             {{ link.label }}
           </a>
-
         </div>
       </div>
     </transition>
@@ -86,34 +85,49 @@
 
 <script setup>
 import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+
+const route = useRoute();
+const router = useRouter();
+
+const mobileMenuOpen = ref(false);
 
 const navLinks = [
   { id: "landing_page", label: "Home", href: "/" },
-  { id: "features", label: "Features", href: "#features" },
-  { id: "how-it-works", label: "How It Works", href: "#how-it-works" },
-  { id: "benefits", label: "Benefits", href: "#benefits" },
-  { id: "contact", label: "Contact", href: "#contact" },
+  { id: "features", label: "Features", href: "/#features" },
+  { id: "how-it-works", label: "How It Works", href: "/#how-it-works" },
+  { id: "benefits", label: "Benefits", href: "/#benefits" },
+  { id: "contact", label: "Contact", href: "/#contact" },
 ];
-
-const mobileMenuOpen = ref(false);
 
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
 };
 
-const closeMobileMenu = (id = "") => {
+const closeMobileMenu = () => {
   mobileMenuOpen.value = false;
-  if (id) {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  }
 };
 
 const scrollToSection = (id) => {
   const el = document.getElementById(id);
   if (el) {
     el.scrollIntoView({ behavior: "smooth" });
-    closeMobileMenu();
   }
+};
+
+const handleNavClick = (link) => {
+  const isHashLink = link.href.startsWith("/#");
+  const isCurrentPage = route.path === "/";
+
+  if (isHashLink && isCurrentPage) {
+    // Stay on the current page and scroll
+    const id = link.href.split("#")[1];
+    scrollToSection(id);
+  } else {
+    // Navigate to the page
+    router.push(link.href);
+  }
+
+  closeMobileMenu();
 };
 </script>

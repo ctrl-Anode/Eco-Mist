@@ -1,130 +1,87 @@
 <template>
-  <div class="flex justify-center items-center min-h-screen bg-white p-4">
-    <div class="relative w-full max-w-4xl h-[600px]">
-      <!-- Admin/User Box -->
-      <div class="absolute top-0 left-0 border-2 border-black w-[250px] h-[100px] flex items-center justify-center">
-        <div class="font-mono text-lg">
-          Admin<br />/User
-        </div>
-      </div>
+  <div class="admin-dashboard">
+    <h2 class="text-xl font-bold mb-4">Device Management</h2>
 
-      <!-- Center System Box -->
-      <div class="absolute top-0 left-[350px] border-2 border-black rounded-3xl w-[300px] h-[180px] flex items-center justify-center text-center">
-        <div class="font-mono">
-          Eco-Mist: IoT-Driven<br />
-          Web-based System for<br />
-          Automated Management<br />
-          and Monitoring of<br />
-          Aeroponics Farming
-        </div>
-      </div>
+    <section v-if="loading" class="text-gray-500">Loading devices...</section>
 
-      <!-- Device Box -->
-      <div class="absolute top-0 right-0 border-2 border-black w-[250px] h-[140px] flex items-center justify-center text-center">
-        <div class="font-mono">
-          Eco-Mist<br />
-          Device<br />
-          Vertical<br />
-          Aeroponics<br />
-          Tower
-        </div>
-      </div>
+    <section v-else>
+      <div v-for="(device, id) in devices" :key="id" class="border p-4 rounded mb-4">
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="font-semibold">{{ device.devicename || `Device-${id}` }}</h3>
+            <p><strong>ID:</strong> {{ id }}</p>
+            <p><strong>Status:</strong> {{ device.status }}</p>
+            <p><strong>IP:</strong> {{ device.state?.ip_address || 'N/A' }}</p>
+            <p><strong>SSID:</strong> {{ device.state?.connected_ssid || 'N/A' }}</p>
+            <p><strong>Registered:</strong> {{ device.registered ? '✅' : '❌' }}</p>
+            <p><strong>Owner:</strong> {{ device.owner }}</p>
+            <p><strong>Last Online:</strong> {{ device.last_online || 'N/A' }}</p>
+          </div>
 
-      <!-- Input Image -->
-      <div class="absolute top-[180px] left-0 text-right">
-        <div class="flex items-center">
-          <span class="mr-2 text-sm font-mono text-blue-800">Input Image</span>
-          <div class="w-[200px] h-px bg-black relative">
-            <div class="absolute right-0 top-0 w-2 h-2 border-t-2 border-r-2 border-black transform rotate-45 -mt-1"></div>
+          <div class="flex flex-col gap-2">
+            <button @click="triggerReconnect(id)" class="bg-blue-500 text-white px-3 py-1 rounded">
+              🔄 Trigger Reconnect
+            </button>
+            <button @click="clearCredentials(id)" class="bg-yellow-500 text-white px-3 py-1 rounded">
+              🧹 Clear Credentials
+            </button>
+            <button @click="deleteDevice(id)" class="bg-red-500 text-white px-3 py-1 rounded">
+              🗑️ Delete Device
+            </button>
           </div>
         </div>
       </div>
-
-      <!-- Device Adjustments -->
-      <div class="absolute top-[230px] left-0 text-right">
-        <div class="flex items-center">
-          <span class="mr-2 text-sm font-mono text-blue-800">Device Adjustments</span>
-          <div class="w-[200px] h-px bg-black relative">
-            <div class="absolute right-0 top-0 w-2 h-2 border-t-2 border-r-2 border-black transform rotate-45 -mt-1"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Announcement and Communication -->
-      <div class="absolute top-[280px] left-0 text-right">
-        <div class="flex items-center">
-          <span class="mr-2 text-sm font-mono text-blue-800">Announcement and<br/>Communication</span>
-          <div class="w-[200px] h-px bg-black relative">
-            <div class="absolute right-0 top-0 w-2 h-2 border-t-2 border-r-2 border-black transform rotate-45 -mt-1"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Income and Expense Management -->
-      <div class="absolute top-[345px] left-0 text-right">
-        <div class="flex items-center">
-          <span class="mr-2 text-sm font-mono text-blue-800">Income and Expense<br/>Management</span>
-          <div class="w-[200px] h-px bg-black relative">
-            <div class="absolute right-0 top-0 w-2 h-2 border-t-2 border-r-2 border-black transform rotate-45 -mt-1"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Data from processed image -->
-      <div class="absolute top-[415px] left-0 text-right">
-        <div class="flex items-center">
-          <span class="mr-2 text-sm font-mono text-blue-800">Data from processed<br/>image</span>
-          <div class="w-[200px] h-px bg-black relative">
-            <div class="absolute left-0 top-0 w-2 h-2 border-t-2 border-l-2 border-black transform -rotate-45 -mt-1"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Real-Time Notification -->
-      <div class="absolute top-[485px] left-0 text-right">
-        <div class="flex items-center">
-          <span class="mr-2 text-sm font-mono text-blue-800">Real-Time Notification</span>
-          <div class="w-[200px] h-px bg-black relative">
-            <div class="absolute left-0 top-0 w-2 h-2 border-t-2 border-l-2 border-black transform -rotate-45 -mt-1"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Real-time Monitoring -->
-      <div class="absolute top-[530px] left-0 text-right">
-        <div class="flex items-center">
-          <span class="mr-2 text-sm font-mono text-blue-800">Real-time Monitoring</span>
-          <div class="w-[200px] h-px bg-black relative">
-            <div class="absolute left-0 top-0 w-2 h-2 border-t-2 border-l-2 border-black transform -rotate-45 -mt-1"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Misting Cycle -->
-      <div class="absolute top-[385px] right-0">
-        <div class="flex items-center">
-          <div class="w-[200px] h-px bg-black relative">
-            <div class="absolute right-0 top-0 w-2 h-2 border-t-2 border-r-2 border-black transform rotate-45 -mt-1"></div>
-          </div>
-          <span class="ml-2 text-sm font-mono text-blue-800">Misting<br/>Cycle</span>
-        </div>
-      </div>
-
-      <!-- Sensor Data -->
-      <div class="absolute top-[230px] right-0">
-        <div class="flex items-center">
-          <div class="w-[200px] h-px bg-black relative">
-            <div class="absolute left-0 top-0 w-2 h-2 border-t-2 border-l-2 border-black transform -rotate-45 -mt-1"></div>
-          </div>
-          <span class="ml-2 text-sm font-mono text-blue-800">Sensor Data</span>
-        </div>
-      </div>
-    </div>
+    </section>
   </div>
 </template>
 
 <script>
+import { getDatabase, ref, onValue, set, remove } from "firebase/database";
+
 export default {
-  name: "EcoMistDiagram"
+  name: "AdminDeviceManager",
+  data() {
+    return {
+      devices: {},
+      loading: true,
+    };
+  },
+  mounted() {
+    const db = getDatabase();
+    const devicesRef = ref(db, "devices");
+
+    onValue(devicesRef, (snapshot) => {
+      this.devices = snapshot.val() || {};
+      this.loading = false;
+    });
+  },
+  methods: {
+    async triggerReconnect(id) {
+      const db = getDatabase();
+      await set(ref(db, `devices/${id}/state/reconnect`), true);
+      alert(`Reconnect signal sent to device ${id}`);
+    },
+    async clearCredentials(id) {
+      const db = getDatabase();
+      await set(ref(db, `devices/${id}/credentials/email`), "");
+      await set(ref(db, `devices/${id}/credentials/password`), "");
+      alert(`Credentials cleared for ${id}`);
+    },
+    async deleteDevice(id) {
+      const db = getDatabase();
+      if (confirm(`Are you sure you want to delete device ${id}?`)) {
+        await remove(ref(db, `devices/${id}`));
+        alert(`Device ${id} deleted.`);
+      }
+    },
+  },
 };
 </script>
+
+<style scoped>
+.admin-dashboard {
+  max-width: 800px;
+  margin: auto;
+  padding: 1rem;
+}
+</style>

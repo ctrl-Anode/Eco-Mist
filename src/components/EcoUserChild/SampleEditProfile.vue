@@ -442,7 +442,7 @@ const updateProfileImage = async () => {
   uploadError.value = "";
 
   try {
-    const fileName = `profile_pictures/${auth.currentUser.uid}-${Date.now()}`;
+    const fileName = `profile_pictures/${auth.currentUser.uid}.jpg`;
     const fileRef = storageRef(storage, fileName);
     await uploadBytes(fileRef, selectedFile.value);
     const downloadURL = await getDownloadURL(fileRef);

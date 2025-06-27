@@ -26,9 +26,31 @@ service cloud.firestore {
 
     // ─── Users Collection ─────────────────────────────
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isOwner(userId);
-      allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
+  allow read: if isAuthenticated();
+  
+  allow create: if isAuthenticated() && isOwner(userId) &&
+    request.resource.data.keys().hasOnly([
+      'username', 'email', 'profileImageUrl', 'completeName', 'birthday', 'cellphone',
+      'gender', 'address', 'role', 'status', 'createdAt', 'emailVerified',
+      'authProvider', 'loginCount'
+    ]) &&
+    request.resource.data.username is string &&
+    request.resource.data.email is string &&
+    request.resource.data.profileImageUrl is string &&
+    request.resource.data.completeName is string &&
+    request.resource.data.birthday is string && // stored as string (ISO) from your frontend
+    request.resource.data.cellphone is string &&
+    request.resource.data.gender in ['male', 'female', 'other'] &&
+    request.resource.data.address is string &&
+    request.resource.data.role in ['user', 'admin'] &&
+    request.resource.data.status == 'active' &&
+    request.resource.data.createdAt is string &&
+    request.resource.data.emailVerified is bool &&
+    request.resource.data.authProvider in ['email', 'google'] &&
+    request.resource.data.loginCount is int;
+
+  allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
+
 
       // ─── Transactions Subcollection ───────────────
       match /transactions/{transactionId} {
@@ -52,19 +74,7 @@ service cloud.firestore {
                     request.resource.data.timestamp is timestamp;
       allow read, delete: if isAuthenticated() && isAdmin();
     }
-
-    // ─── Messages ────────────────────────────────────
-    match /messages/{messageId} {
-      allow read: if request.auth != null;
-      
-      allow update: if request.auth != null &&
-        // Allow sender to edit/delete their own message
-        resource.data.userId == request.auth.uid ||
-        // Allow recipient to mark as read if they didn't send the message
-        (!('userId' in request.resource.data) || request.resource.data.userId == resource.data.userId) &&
-        request.resource.data.keys().hasOnly(['read']);
-    }
-
+    
     // ─── Typing Status ───────────────────────────────
     match /typing/{typingId} {
       allow read: if isAuthenticated();
@@ -155,6 +165,61 @@ service cloud.firestore {
       allow create: if isAuthenticated() &&
                     get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['user', 'admin']; // Allow both 'user' and 'admin' roles
     }
+    // ─── Messages ────────────────────────────────────
+     function isSender(message) {
+      return request.auth != null && request.auth.uid == message.userId;
+    }
 
+    function isOnlyReadOrReactionUpdate() {
+      let allowedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return allowedKeys.hasOnly(['readBy', 'reactions', 'replies']);
+    }
+
+    function isReadByUpdate() {
+      return request.resource.data.readBy != null &&
+             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy']);
+    }
+
+    function isReactionUpdate() {
+      return request.resource.data.reactions != null &&
+             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']);
+    }
+
+    function isReplyUpdate() {
+      return request.resource.data.replies != null &&
+             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['replies']);
+    }
+
+    // ─── Messages Collection ─────────────────────────
+    match /messages/{messageId} {
+
+      // Read: Any authenticated user can read messages
+      allow read: if isAuthenticated();
+
+      // Create: Authenticated users can create their own message
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.text is string &&
+        request.resource.data.timestamp is timestamp;
+
+      // Update: 
+      allow update: if isAuthenticated() && (
+        
+        // Sender can edit their own message (text, fileUrl, edited flag, etc.)
+        isSender(resource.data)
+
+        // Other users can update readBy field
+        || (isReadByUpdate() && !isSender(resource.data))
+
+        // Other users can update reactions only
+        || (isReactionUpdate() && !isSender(resource.data))
+
+        // Other users can update replies only
+        || (isReplyUpdate() && !isSender(resource.data))
+      );
+
+      // Delete: Only the sender can delete their own message
+      allow delete: if isSender(resource.data);
+    }
   }
 }

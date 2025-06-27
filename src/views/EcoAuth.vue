@@ -1,123 +1,117 @@
 <template>
   <div
-    class="min-h-screen relative bg-cover bg-bottom bg-no-repeat"
+    class="fixed inset-0 bg-cover bg-bottom bg-no-repeat z-0"
     style="background-image: url('/aeroponics_bg.png');"
+    role="presentation"
+    aria-hidden="true"
+  >
+    <!-- Overlay layers -->
+    <div class="absolute inset-0 bg-black/30 z-10" aria-hidden="true"></div>
+  </div>
+
+
+  <div class="fixed top-16 right-4 bg-white shadow-lg rounded-lg w-64 z-30" v-if="showNotifications">
+    <div class="p-4 border-b">
+      <h3 class="text-sm font-semibold text-gray-700">Notifications</h3>
+    </div>
+    <ul class="max-h-64 overflow-y-auto">
+      <li
+        v-for="(notification, index) in notifications"
+        :key="index"
+        class="p-4 border-b last:border-b-0 text-sm text-gray-600"
+      >
+        {{ notification }}
+      </li>
+    </ul>
+    <button
+      class="w-full text-center text-sm text-red-500 py-2 hover:bg-red-100"
+      @click="clearNotifications"
+    >
+      Clear All
+    </button>
+  </div>
+
+  <!-- Main content container, scrollable -->
+  <div
+    class="relative z-20 flex flex-col min-h-screen overflow-y-auto"
+    :class="{ 'high-contrast': isHighContrast }"
+    style="position: relative;"
     role="main"
     aria-label="User Authentication Page"
   >
-    <!-- Overlay layers -->
-    <div class="absolute inset-0 bg-black/30 z-0" aria-hidden="true"></div>
+    <!-- Navigation -->
+    <AuthHeader @toggleMobileMenu="toggleMobileMenu" />
 
-    <!-- High Contrast Mode Toggle -->
-    <button
-      @click="toggleHighContrast"
-      class="absolute top-4 right-4 bg-gray-800 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-white"
-      aria-label="Toggle High Contrast Mode"
-    >
-      Toggle High Contrast
-    </button>
+    <!-- Global Alert -->
+    <AuthAlert :alert="globalAlert" @close="closeGlobalAlert" />
 
-    <!-- Notification Dropdown -->
-    <div class="absolute top-16 right-4 bg-white shadow-lg rounded-lg w-64" v-if="showNotifications">
-      <div class="p-4 border-b">
-        <h3 class="text-sm font-semibold text-gray-700">Notifications</h3>
-      </div>
-      <ul class="max-h-64 overflow-y-auto">
-        <li
-          v-for="(notification, index) in notifications"
-          :key="index"
-          class="p-4 border-b last:border-b-0 text-sm text-gray-600"
-        >
-          {{ notification }}
-        </li>
-      </ul>
-      <button
-        class="w-full text-center text-sm text-red-500 py-2 hover:bg-red-100"
-        @click="clearNotifications"
-      >
-        Clear All
-      </button>
+    <!-- Centered Login/Register card container with margin-top -->
+    <div class="flex-grow flex justify-center items-center mt-16 px-4 py-8">
+      <transition name="slide-fade" mode="out-in">
+        <AuthLogin
+          v-if="isLoginView"
+          :loginForm="loginForm"
+          :loginErrors="loginErrors"
+          :loading="loading"
+          :showPassword="showPassword"
+          :togglePassword="togglePassword"
+          :loginUser="loginUser"
+          @toggleView="toggleView"
+          key="login-form"
+          aria-label="Login Form"
+        />
+        <AuthRegister
+          v-else
+          :registerForm="registerForm"
+          :registerErrors="registerErrors"
+          :loading="loading"
+          :showPassword="showPassword"
+          :profileImagePreview="profileImagePreview"
+          :profileImageError="profileImageError"
+          :togglePassword="togglePassword"
+          :handleProfileImageChange="handleProfileImageChange"
+          :clearProfileImage="clearProfileImage"
+          :registerUser="registerUser"
+          @toggleView="toggleView"
+          @showTerms="showTermsModal = true"
+          @showPrivacy="showPrivacyModal = true"
+          key="register-form"
+          aria-label="Registration Form"
+        />
+      </transition>
     </div>
 
-    <!-- Main content container -->
-    <div
-      class="relative z-10 flex flex-col min-h-screen"
-      :class="{ 'high-contrast': isHighContrast }"
+    <!-- Terms and Privacy modals -->
+    <AuthTerms
+      :show="showTermsModal"
+      @close="showTermsModal = false"
+      @accept="acceptTerms"
+      aria-label="Terms of Service Modal"
     >
-      <!-- Navigation -->
-      <AuthHeader @toggleMobileMenu="toggleMobileMenu" />
+      <template #default>
+        <p class="text-sm text-gray-500 mb-4">Last updated: May 7, 2025</p>
+        <p class="text-sm text-gray-600">
+          By accessing or using Eco-Mist's services, you agree to be bound by these Terms of Service.
+        </p>
+      </template>
+    </AuthTerms>
 
-      <!-- Global Alert -->
-      <AuthAlert :alert="globalAlert" @close="closeGlobalAlert" />
+    <AuthPrivacy
+      :show="showPrivacyModal"
+      @close="showPrivacyModal = false"
+      @accept="acceptPrivacy"
+      aria-label="Privacy Policy Modal"
+    >
+      <template #default>
+        <p class="text-sm text-gray-500 mb-4">Last updated: May 7, 2025</p>
+        <p class="text-sm text-gray-600">
+          We collect personal information to provide our services and ensure a secure experience.
+        </p>
+      </template>
+    </AuthPrivacy>
 
-      <!-- Centered Login/Register card container with margin-top -->
-      <div class="flex-grow flex justify-center items-center mt-16 px-4 py-8">
-        <transition name="slide-fade" mode="out-in">
-          <AuthLogin
-            v-if="isLoginView"
-            :loginForm="loginForm"
-            :loginErrors="loginErrors"
-            :loading="loading"
-            :showPassword="showPassword"
-            :togglePassword="togglePassword"
-            :loginUser="loginUser"
-            @toggleView="toggleView"
-            key="login-form"
-            aria-label="Login Form"
-          />
-          <AuthRegister
-            v-else
-            :registerForm="registerForm"
-            :registerErrors="registerErrors"
-            :loading="loading"
-            :showPassword="showPassword"
-            :profileImagePreview="profileImagePreview"
-            :profileImageError="profileImageError"
-            :togglePassword="togglePassword"
-            :handleProfileImageChange="handleProfileImageChange"
-            :clearProfileImage="clearProfileImage"
-            :registerUser="registerUser"
-            @toggleView="toggleView"
-            @showTerms="showTermsModal = true"
-            @showPrivacy="showPrivacyModal = true"
-            key="register-form"
-            aria-label="Registration Form"
-          />
-        </transition>
-      </div>
-
-      <!-- Terms and Privacy modals -->
-      <AuthTerms
-        :show="showTermsModal"
-        @close="showTermsModal = false"
-        @accept="acceptTerms"
-        aria-label="Terms of Service Modal"
-      >
-        <template #default>
-          <p class="text-sm text-gray-500 mb-4">Last updated: May 7, 2025</p>
-          <p class="text-sm text-gray-600">
-            By accessing or using Eco-Mist's services, you agree to be bound by these Terms of Service.
-          </p>
-        </template>
-      </AuthTerms>
-
-      <AuthPrivacy
-        :show="showPrivacyModal"
-        @close="showPrivacyModal = false"
-        @accept="acceptPrivacy"
-        aria-label="Privacy Policy Modal"
-      >
-        <template #default>
-          <p class="text-sm text-gray-500 mb-4">Last updated: May 7, 2025</p>
-          <p class="text-sm text-gray-600">
-            We collect personal information to provide our services and ensure a secure experience.
-          </p>
-        </template>
-      </AuthPrivacy>
-
-      <!-- Footer -->
-      <AuthFooter />
-    </div>
+    <!-- Footer -->
+    <AuthFooter />
   </div>
 </template>
 
@@ -218,11 +212,6 @@ const toggleView = () => {
 
 const togglePassword = () => {
   showPassword.value = !showPassword.value;
-};
-
-const toggleHighContrast = () => {
-  isHighContrast.value = !isHighContrast.value;
-  document.body.classList.toggle("high-contrast", isHighContrast.value);
 };
 
 const toggleNotifications = () => {
