@@ -70,7 +70,7 @@ export function useTawk() {
 
       script.onload = () => {
         logTawkEvent('✅ Tawk script loaded');
-        setTimeout(() => window.Tawk_API?.maximize?.(), 300);
+        //setTimeout(() => window.Tawk_API?.maximize?.(), 300);
       };
 
       script.onerror = () => {

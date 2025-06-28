@@ -19,3 +19,12 @@ Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://
 -app.py
 -firebase.js
 -main.js
+
+6-28-2025
+
+-app.py
+-EcoUser_TopNavBar
+-Sample Detector
+-Sample Messenger
+-useTawk.js
+-public/sounds

@@ -11,7 +11,6 @@
         <img src="/eco-mist-logo.png" alt="Eco-Mist Logo" class="h-7 w-7 mr-3 rounded-lg shadow-md bg-white p-1.5" @error="handleLogoError" />
         <div>
           <h1 class="text-xl font-bold text-white">Eco-Mist</h1>
-          <p class="text-green-100 text-xs hidden sm:block">User Profile</p>
         </div>
       </div>
 

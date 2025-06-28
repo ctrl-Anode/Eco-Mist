@@ -65,7 +65,6 @@ RECOMMENDATIONS = {
     ]
 }
 
-# Prediction route
 @app.route('/predict', methods=['POST'])
 def predict():
     if model is None:
@@ -78,7 +77,7 @@ def predict():
         email = decoded_user.get('email', 'Unknown')
         logger.info(f"🔐 Authorized user: {email} ({uid})")
 
-        # Get the uploaded image
+        # 📷 Get the uploaded image
         file = request.files.get('file')
         if file is None:
             return jsonify({"error": "No file uploaded"}), 400
@@ -88,9 +87,23 @@ def predict():
         img_array = np.expand_dims(img_array, axis=0)
 
         predictions = model.predict(img_array)
+
+        # 🧠 Fallback logic using "Cant Classified" (Lettuce) class
+        MIN_CONFIDENCE = 0.50
+        LETTUCE_CLASS_INDEX = CLASS_LABELS.index("Cant Classified")
+
         predicted_index = np.argmax(predictions[0])
         predicted_label = CLASS_LABELS[predicted_index]
         confidence = float(predictions[0][predicted_index])
+        lettuce_confidence = float(predictions[0][LETTUCE_CLASS_INDEX])
+
+        fallback_used = False
+        if confidence < MIN_CONFIDENCE and lettuce_confidence > 0.25:
+            predicted_label = "Cant Classified"
+            confidence = lettuce_confidence
+            fallback_used = True
+            logger.info("⚠️ Fallback to 'Cant Classified' due to low confidence")
+
         class_probabilities = {
             CLASS_LABELS[i]: float(predictions[0][i]) for i in range(len(CLASS_LABELS))
         }
@@ -100,7 +113,8 @@ def predict():
             "prediction": predicted_label,
             "confidence": round(confidence, 4),
             "class_probabilities": class_probabilities,
-            "recommendations": RECOMMENDATIONS[predicted_label]
+            "recommendations": RECOMMENDATIONS[predicted_label],
+            "fallback_used": fallback_used  # 🟡 Optional, for frontend awareness
         })
 
     except Exception as e:
