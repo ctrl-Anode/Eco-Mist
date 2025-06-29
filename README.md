@@ -28,3 +28,11 @@ Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://
 -Sample Messenger
 -useTawk.js
 -public/sounds
+
+6-29-2025
+
+-AuthPrivacy
+-AuthTerms
+-LandingContact
+-LandingFAQ
+-LandingFooter

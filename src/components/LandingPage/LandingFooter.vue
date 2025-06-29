@@ -55,15 +55,24 @@
       <div class="border-t border-green-100 mt-10 pt-8 text-center">
         <p class="text-gray-600">© 2025 Eco-Mist. All rights reserved.</p>
         <div class="flex justify-center flex-wrap gap-4 mt-4">
-          <a v-for="(policy, idx) in policies" :key="idx" :href="policy.href" class="text-gray-600 hover:text-green-600 transition-colors text-sm">{{ policy.text }}</a>
+          <a v-for="(policy, idx) in policies" :key="idx" @click="policy.onClick" class="text-gray-600 hover:text-green-600 transition-colors text-sm">{{ policy.text }}</a>
         </div>
       </div>
     </div>
+
+    <!-- Privacy Policy Modal -->
+    <AuthPrivacy :show="showPrivacy" v-if="showPrivacy" @close="showPrivacy = false" />
+
+    <!-- Terms of Service Modal -->
+    <AuthTerms :show="showTerms" v-if="showTerms" @close="showTerms = false" />
   </footer>
 </template>
 
 <script setup>
 import { defineAsyncComponent } from "vue";
+import AuthPrivacy from "../Authentication/AuthPrivacy.vue";
+import AuthTerms from "../Authentication/AuthTerms.vue";
+import { ref } from "vue";
 
 // Dynamic icon components
 const ChevronRightIcon = defineAsyncComponent(() => import("../icons/ChevronRightIcon.vue"));
@@ -75,6 +84,9 @@ const FacebookIcon = defineAsyncComponent(() => import("../icons/FacebookIcon.vu
 const TwitterIcon = defineAsyncComponent(() => import("../icons/TwitterIcon.vue"));
 const InstagramIcon = defineAsyncComponent(() => import("../icons/InstagramIcon.vue"));
 const LinkedInIcon = defineAsyncComponent(() => import("../icons/LinkedInIcon.vue"));
+
+const showPrivacy = ref(false);
+const showTerms = ref(false);
 
 const socialIcons = [
   { link: "#", component: FacebookIcon },
@@ -106,8 +118,7 @@ const contacts = [
 ];
 
 const policies = [
-  { text: "Privacy Policy", href: "#" },
-  { text: "Terms of Service", href: "#" },
-  { text: "Cookie Policy", href: "#" },
+  { text: "Privacy Policy", onClick: () => (showPrivacy.value = true) },
+  { text: "Terms of Service", onClick: () => (showTerms.value = true) },
 ];
 </script>

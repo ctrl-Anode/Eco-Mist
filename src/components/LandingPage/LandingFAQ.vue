@@ -35,12 +35,12 @@ const faqs = [
   {
     question: "Is Eco-Mist suitable for all crops?",
     answer:
-      "Eco-Mist is ideal for a wide range of crops, particularly those that thrive in aeroponic systems, such as leafy greens, herbs, strawberries, and many other high-value crops that benefit from precise environmental control.",
+      "Eco-Mist is ideal for a wide range of crops, particularly those that thrive in aeroponic systems, such as leafy greens, herbs, and many other high-value crops that benefit from precise environmental control.",
   },
   {
     question: "What kind of support do you offer?",
     answer:
-      "We provide comprehensive support including installation guidance, system training, regular software updates, and 24/7 technical assistance to ensure your Eco-Mist system operates at peak performance.",
+      "We provide comprehensive support including installation guidance, system training, regular software updates, and technical assistance to ensure your Eco-Mist system operates at peak performance.",
   },
 ];
 </script>

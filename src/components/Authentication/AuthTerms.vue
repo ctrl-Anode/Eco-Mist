@@ -207,13 +207,13 @@
               >
                 Close
               </button>
-              <button
+              <!-- <button
                 type="button"
                 class="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 @click="$emit('accept')"
               >
                 Accept Terms
-              </button>
+              </button> -->
             </div>
           </div>
         </div>

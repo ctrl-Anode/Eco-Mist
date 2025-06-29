@@ -24,10 +24,10 @@
               <div class="flex items-center justify-between">
                 <div>
                   <h3 class="text-2xl font-bold text-gray-900 mb-2" id="modal-title">
-                    Privacy Policy & Terms
+                    Privacy Policy & Conditions of Use
                   </h3>
                   <p class="text-sm text-gray-600">
-                    Please review our privacy policy and terms of use
+                    Please review our privacy policy and conditions of use.
                   </p>
                 </div>
                 <button
@@ -162,13 +162,13 @@
               >
                 Close
               </button>
-              <button
+              <!-- <button
                 type="button"
                 class="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl hover:from-emerald-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 @click="$emit('accept')"
               >
                 Accept & Continue
-              </button>
+              </button> -->
             </div>
           </div>
         </div>

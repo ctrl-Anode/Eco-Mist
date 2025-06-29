@@ -179,7 +179,7 @@ const submitContactForm = async () => {
     contactForm.email = '';
     contactForm.message = '';
 
-    successMessage.value = 'Thank you for your message! We will get back to you soon.';
+    successMessage.value = 'Thank you for your message! Kindly check your email and wait for our response.';
     errorMessage.value = '';
   } catch (error) {
     console.error('Error submitting contact form:', error);
