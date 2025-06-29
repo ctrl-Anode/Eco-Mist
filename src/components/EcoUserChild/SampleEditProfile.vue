@@ -318,7 +318,7 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, getDoc, updateDoc, Timestamp } from "firebase/firestore";
+import { doc, getDoc, updateDoc, Timestamp,getFirestore } from "firebase/firestore";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../../firebase";
 
@@ -479,7 +479,17 @@ const validateField = (field, value) => {
   }
   return "";
 };
+const userRole = ref('');
+onMounted(async () => {
+  const auth = getAuth()
+  const db = getFirestore()
+  const user = auth.currentUser
 
+  if (user) {
+    const docSnap = await getDoc(doc(db, 'users', user.uid))
+    userRole.value = docSnap.exists() ? docSnap.data().role || 'user' : 'user'
+  }
+})
 const updateProfileInfo = async () => {
   const user = auth.currentUser;
   if (!user) return;
@@ -515,7 +525,7 @@ const updateProfileInfo = async () => {
     successMessage.value = "Profile updated successfully!";
     showToast("Profile updated successfully!", "success");
     setTimeout(() => {
-      router.push("/user/settings/profile-display");
+      router.push(`/${userRole.value}/settings/profile-display`)
     }, 2000);
   } catch (error) {
     errorMessage.value = "Failed to update profile";

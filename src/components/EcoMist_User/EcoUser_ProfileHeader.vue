@@ -50,24 +50,38 @@
 
       <!-- Action Buttons -->
       <div class="flex flex-wrap gap-4 mt-4 md:mt-0">
-        <router-link to="/user/settings/edit-profile" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-emerald-700 rounded-md hover:bg-gray-100 transition-colors shadow-sm hover:shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
-          Edit Profile
-        </router-link>
-        <router-link to="/user/settings/reset-password" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-emerald-700 border border-emerald-200 rounded-md hover:bg-emerald-50 transition-colors shadow-sm hover:shadow">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-          </svg>
-          Change Password
-        </router-link>
+        <router-link
+  :to="editProfilePath"
+  class="inline-flex items-center gap-2 px-4 py-2 bg-white text-emerald-700 rounded-md hover:bg-gray-100 transition-colors shadow-sm hover:shadow-md"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+  </svg>
+  Edit Profile
+</router-link>
+
+<router-link
+  :to="resetPasswordPath"
+  class="inline-flex items-center gap-2 px-4 py-2 bg-white text-emerald-700 border border-emerald-200 rounded-md hover:bg-emerald-50 transition-colors shadow-sm hover:shadow"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+      d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+  </svg>
+  Change Password
+</router-link>
+
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref, onMounted, computed } from 'vue'
+import { getAuth } from 'firebase/auth'
+import { getFirestore, doc, getDoc } from 'firebase/firestore'
+
 const props = defineProps({
   username: String,
   email: String,
@@ -87,4 +101,27 @@ const handleImageError = (e) => {
   e.target.parentNode.classList.add('bg-emerald-600');
   e.target.parentNode.textContent = getInitials(props.username);
 };
+
+const userRole = ref(null)
+const editProfilePath = computed(() => {
+  return userRole.value ? `/${userRole.value}/settings/edit-profile` : '#'
+})
+const resetPasswordPath = computed(() => {
+  return userRole.value ? `/${userRole.value}/settings/reset-password` : '#'
+})
+
+onMounted(async () => {
+  const auth = getAuth()
+  const db = getFirestore()
+  const user = auth.currentUser
+
+  if (user) {
+    const docSnap = await getDoc(doc(db, 'users', user.uid))
+    if (docSnap.exists()) {
+      userRole.value = docSnap.data().role || 'user'
+    } else {
+      userRole.value = 'user' // fallback
+    }
+  }
+})
 </script>

@@ -1819,7 +1819,7 @@ const handleDropSingle = (e) => {
   onFileChange({ target: { files: [droppedFile] } });
 };
 
-const showHistorySection = ref(true);
+const showHistorySection = ref(false);
 const historyFilter = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 6;
@@ -1844,7 +1844,7 @@ const goToPage = (page) => {
   if (page >= 1 && page <= totalPages.value) currentPage.value = page;
 };
 
-const showComparisonSection = ref(true);
+const showComparisonSection = ref(false);
 const comparisonFilter = ref('');
 const comparisonPage = ref(1);
 const comparisonsPerPage = 6;

@@ -254,7 +254,7 @@ const loginUser = async () => {
 
       // Redirect based on role
       if (userRole === "admin") {
-        router.push("/admin-dashboard");
+        router.push("/admin/dashboard");
       } else {
         router.push("/user/dashboard");
       }
@@ -314,7 +314,7 @@ const handleGoogleSignIn = async () => {
     }
 
     localStorage.setItem("userRole", userSnap.exists() ? userSnap.data().role : "user");
-    router.push(userSnap.exists() && userSnap.data().role === "admin" ? "/admin-dashboard" : "/user/dashboard");
+    router.push(userSnap.exists() && userSnap.data().role === "admin" ? "/admin/dashboard" : "/user/dashboard");
   } catch (error) {
     console.error(error);
     alert(error.message || "Google Sign-In failed!");

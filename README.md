@@ -36,3 +36,15 @@ Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://
 -LandingContact
 -LandingFAQ
 -LandingFooter
+
+part 2
+
+-AuthLogin
+-EcoUser_Profile Header
+-EcoSettingsParent
+-SampleDetector
+-SampleEditProfile
+-SampleResetPassword
+-All EcoAdmin
+-EcoAdminParent
+-Router

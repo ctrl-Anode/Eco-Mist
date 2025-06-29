@@ -6,16 +6,12 @@ import { db } from "./firebase";
 import LandingPage from './views/LandingPage.vue';
 import UserAuth from './views/EcoAuth.vue';
 import EcoUserParent from './views/EcoUserParent.vue';
-
-import AdminDashboard from './components/EcoAdmin/Admin_Dashboard.vue';
-import AdminManagement from "./components/EcoAdmin/AdminManagement.vue";
+import EcoAdminParent from './views/EcoAdminParent.vue';
 
 import EcoTry from "./components/EcoTry.vue"
 
-import DeviceLogs from './components/EcoAdmin/DeviceLogs.vue';
-import SystemLogs from './components/EcoAdmin/SystemLogs.vue';
 
-//tryyyyyyyyyy
+///User
 import EcoProfilePage from './components/EcoUserChild/EcoProfilePage.vue';
 import SampleDashboard from './components/EcoUserChild/SampleDashboard.vue';
 import SampleEditProfile from './components/EcoUserChild/SampleEditProfile.vue';
@@ -26,38 +22,61 @@ import SampleDetector from './components/EcoUserChild/SampleDetector.vue';
 import SampleFinancial from './components/EcoUserChild/SampleFinancial.vue';
 import SampleSensor from './components/EcoUserChild/SampleSensor.vue';
 
+///Admin
+import EcoAdmin_Dashboard from './components/EcoAdmin/EcoAdmin_Child/EcoAdmin_Dashboard.vue';
+import EcoAdmin_UserManagement from './components/EcoAdmin/EcoAdmin_Child/EcoAdmin_UserManagement.vue';
+import EcoAdmin_GuestContacts from './components/EcoAdmin/EcoAdmin_Child/EcoAdmin_GuestContacts.vue';
+import EcoAdmin_DeviceLogs from './components/EcoAdmin/EcoAdmin_Child/EcoAdmin_DeviceLogs.vue';
+import EcoAdmin_DeviceManagement from './components/EcoAdmin/EcoAdmin_Child/EcoAdmin_DeviceManagement.vue';
+import EcoAdmin_SystemLogs from './components/EcoAdmin/EcoAdmin_Child/EcoAdmin_SystemLogs.vue';
+
 const routes = [
   { path: '/', name: 'LandingPage', component: LandingPage },
-  
-  { path: '/admin-dashboard', name: 'AdminDashboard', component: AdminDashboard, meta: { requiresAuth: true, role: 'admin' } },
-  { path: "/admin-management", name: "AdminManagement", component: AdminManagement, meta: { requiresAuth: true, role: "admin" } },
   { path: '/auth', name: 'UserAuth', component: UserAuth },
   { path: '/try', name: 'EcoTry', component: EcoTry },
-
-  { path: '/device-logs', component: DeviceLogs , meta: { requiresAuth: true} },
-  { path: '/system-logs', component: SystemLogs , meta: { requiresAuth: true} },
 
   {  // 🔹Tryyyyy EcoUserLayout for User Profile Display
   path: '/user',
     component: EcoUserParent,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, role: 'user' },
     children: [
-      { path: 'profile-display', component: EcoProfilePage, meta: { requiresAuth: true, role: 'user' } },
+      { path: 'profile-display', component: EcoProfilePage, meta: { requiresAuth: true}, role: 'user' },
       { path: 'dashboard', component: SampleDashboard, meta: { requiresAuth: true, role: 'user' } },
-      { path: 'messenger', component: SampleMessenger, meta: { requiresAuth: true} },
+      { path: 'messenger', component: SampleMessenger, meta: { requiresAuth: true}, role: 'user' },
       { path: 'model', component: SampleDetector, meta: { requiresAuth: true, role: 'user' } },
       { path: 'financial-management', component: SampleFinancial, meta: { requiresAuth: true, role: 'user' } },
-      { path: 'sensor_data', component: SampleSensor, meta: { requiresAuth: true, role: 'user' } },
-      { path: 'settings', component: EcoSettingsParent, meta: { requiresAuth: true },
+      { path: 'sensor_data', component: SampleSensor, meta: { requiresAuth: true, role: 'user', role: 'user' } },
+      { path: 'settings', component: EcoSettingsParent, meta: { requiresAuth: true, role: 'user' },
         children: [
-         { path: 'profile-display', component: EcoProfilePage, meta: { requiresAuth: true } },
-         { path: 'edit-profile', component: SampleEditProfile, meta: { requiresAuth: true } },
-         { path: 'reset-password', component: SampleResetPassword, meta: { requiresAuth: true } },
+         { path: 'profile-display', component: EcoProfilePage, meta: { requiresAuth: true, role: 'user' } },
+         { path: 'edit-profile', component: SampleEditProfile, meta: { requiresAuth: true, role: 'user' } },
+         { path: 'reset-password', component: SampleResetPassword, meta: { requiresAuth: true, role: 'user' } },
       ]
        },
-      
-      // other routes
     ]
+  },
+  {
+  path: '/admin',
+    component: EcoAdminParent,
+    meta: { requiresAuth: true, role: 'admin' },
+     children: [
+
+      { path: 'user-management', component: EcoAdmin_UserManagement, meta: { requiresAuth: true, role: 'admin'} },
+      { path: 'dashboard', component: EcoAdmin_Dashboard, meta: { requiresAuth: true, role: 'admin'} },
+      { path: 'profile-display', component: EcoProfilePage, meta: { requiresAuth: true, role: 'admin'} },
+      { path: 'messenger', component: SampleMessenger, meta: { requiresAuth: true, role: 'admin'} },
+      { path: 'settings', component: EcoSettingsParent, meta: { requiresAuth: true, role: 'admin' },
+        children: [
+         { path: 'profile-display', component: EcoProfilePage, meta: { requiresAuth: true, role: 'admin' } },
+         { path: 'edit-profile', component: SampleEditProfile, meta: { requiresAuth: true, role: 'admin' } },
+         { path: 'reset-password', component: SampleResetPassword, meta: { requiresAuth: true, role: 'admin' } },
+      ]
+       },
+       { path: 'guest-contacts', component: EcoAdmin_GuestContacts, meta: { requiresAuth: true, role: 'admin'} },
+       { path: 'device-logs', component: EcoAdmin_DeviceLogs, meta: { requiresAuth: true, role: 'admin'} },
+       { path: 'device-management', component: EcoAdmin_DeviceManagement, meta: { requiresAuth: true, role: 'admin'} },
+       { path: 'system-logs', component: EcoAdmin_SystemLogs, meta: { requiresAuth: true, role: 'admin'} },
+     ]
   },
 ];
 
@@ -96,8 +115,8 @@ router.beforeEach(async (to, from, next) => {
         const userRole = userSnap.data().role;
 
         if (to.meta.role && to.meta.role !== userRole) {
-          console.warn(`Access denied for role: ${userRole}. Redirecting to /dashboard.`);
-          next("/dashboard");
+          console.warn(`Access denied for role: ${userRole}. Redirecting to /admin/dashboard.`);
+          next("/admin/dashboard");
           return;
         }
 

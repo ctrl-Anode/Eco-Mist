@@ -11,7 +11,8 @@
       <div class="w-full max-w-md">
         <!-- Back Button -->
         <button 
-          @click="$router.push('/user/settings/profile-display')" 
+          @click="$router.push(`/${userRole}/settings/profile-display`)"
+          :disabled="!userRole"
           class="mb-6 inline-flex items-center gap-2 text-green-700 hover:text-green-600 transition-all duration-200 hover:gap-3 group"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 transition-transform group-hover:-translate-x-1">
@@ -151,7 +152,7 @@
               <p class="text-gray-600">
                 Remember your password? 
                 <router-link 
-                  to="/user/dashboard" 
+                  :to="dashboardPath"
                   class="font-semibold text-green-700 hover:text-green-600 underline underline-offset-2 hover:underline-offset-4 transition-all"
                 >
                   Back to Dashboard
@@ -200,7 +201,8 @@
 import { ref, computed, watch, onMounted } from "vue";
 import { getAuth, sendPasswordResetEmail, signOut } from "firebase/auth";
 import { trackEvent } from "../../utils/analytics";
-
+import { getFirestore, doc, getDoc } from 'firebase/firestore'
+const userRole = ref('');
 // Refs
 const email = ref("");
 const suggestedEmail = ref("");
@@ -319,4 +321,18 @@ onMounted(() => {
     email.value = user.email;
   }
 });
+onMounted(async () => {
+  const auth = getAuth()
+  const db = getFirestore()
+  const user = auth.currentUser
+
+  if (user) {
+    const snap = await getDoc(doc(db, 'users', user.uid))
+    userRole.value = snap.exists() ? snap.data().role || 'user' : 'user'
+  }
+});
+const dashboardPath = computed(() => {
+  return userRole.value ? `/${userRole.value}/dashboard` : 'user/dashboard';
+});
+
 </script>

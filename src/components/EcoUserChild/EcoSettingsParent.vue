@@ -10,6 +10,7 @@
             <button
               v-for="tab in tabs"
               :key="tab.name"
+              :disabled="!userRole"
               :class="[ 
                 'flex items-center gap-2 px-3 py-2 text-[clamp(0.75rem,2.5vw,1rem)] font-medium rounded-md whitespace-nowrap',
                 'hover:bg-white/80 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-inset focus:z-10',
@@ -64,32 +65,52 @@
 
 <script setup>
 import { useRoute, useRouter} from 'vue-router';
-import { computed,onMounted  } from 'vue';
+import { computed, ref, onMounted } from 'vue'
+import { getAuth } from 'firebase/auth'
+import { getFirestore, doc, getDoc } from 'firebase/firestore'
 
 const route = useRoute();
 const router = useRouter();
+const userRole = ref('') // will be 'admin' or 'user'
 
-const tabs = [
-  {
-    name: 'EcoProfilePage',
-    label: 'Profile Overview',
-    path: '/user/settings/profile-display'
-  },
-  {
-    name: 'SampleEditProfile',
-    label: 'Edit Profile',
-    path: '/user/settings/edit-profile'
-  },
-  {
-    name: 'SampleResetPassword',
-    label: 'Reset Password',
-    path: '/user/settings/reset-password'
-  }
-];
+const tabs = computed(() => {
+  const basePath = `/${userRole.value}/settings`
+
+  return [
+    {
+      name: 'EcoProfilePage',
+      label: 'Profile Overview',
+      path: `${basePath}/profile-display`
+    },
+    {
+      name: 'SampleEditProfile',
+      label: 'Edit Profile',
+      path: `${basePath}/edit-profile`
+    },
+    {
+      name: 'SampleResetPassword',
+      label: 'Reset Password',
+      path: `${basePath}/reset-password`
+    }
+  ]
+})
+
 
 const currentTab = computed(() => {
-  return tabs.find(tab => tab.name === route.name);
-});
+  return tabs.value.find(tab => tab.name === route.name)
+})
+
+
+onMounted(async () => {
+  const auth = getAuth()
+  const db = getFirestore()
+  const user = auth.currentUser
+
+  if (user) {
+    const docSnap = await getDoc(doc(db, 'users', user.uid))
+    userRole.value = docSnap.exists() ? docSnap.data().role || 'user' : 'user'
+  }
+})
 </script>
 
 <style scoped>
