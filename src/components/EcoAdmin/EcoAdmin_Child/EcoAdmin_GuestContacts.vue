@@ -80,6 +80,8 @@
   <div class="flex items-center gap-2">
     <button @click="openViewModal(message)" title="View" class="text-blue-600 hover:underline text-sm">View</button>
     <button @click="confirmDelete(message)" title="Delete" class="text-red-600 hover:underline text-sm">Delete</button>
+    <button @click="openReplyModal(message)" title="Reply" class="text-green-600 hover:underline text-sm">Reply</button>
+
   </div>
 </div>
 
@@ -191,6 +193,20 @@
     </div>
   </div>
 </Teleport>
+<Teleport to="body">
+  <div v-if="showReplyModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+    <div class="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
+      <h3 class="text-lg font-bold mb-2">✉️ Reply to {{ selectedReplyMessage?.name }}</h3>
+      <input v-model="replySubject" placeholder="Subject" class="w-full mb-3 px-3 py-2 border rounded" />
+      <textarea v-model="replyBody" rows="6" placeholder="Type your message here..." class="w-full px-3 py-2 border rounded resize-none"></textarea>
+      <input type="file" @change="handleFileUpload" class="mb-3" />
+      <div class="text-right mt-4">
+        <button @click="showReplyModal = false" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 mr-2">Cancel</button>
+        <button @click="sendReply" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Send</button>
+      </div>
+    </div>
+  </div>
+</Teleport>
 
   </div>
 </template>
@@ -200,7 +216,9 @@ import { ref, onMounted, computed } from 'vue';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { deleteDoc, doc } from 'firebase/firestore';
-
+import { getAuth } from 'firebase/auth';
+import { addDoc, serverTimestamp } from 'firebase/firestore';
+const auth = getAuth();
 
 const messages = ref([]);
 const loading = ref(true);
@@ -304,6 +322,8 @@ const showBatchDeleteModal = ref(false);
 const openViewModal = (msg) => {
   selectedMessage.value = msg;
   showViewModal.value = true;
+
+  logContactAction('viewed', msg.email, msg.message.slice(0, 50));
 };
 
 const confirmDelete = (msg) => {
@@ -320,21 +340,104 @@ const confirmBatchDelete = () => {
 const deleteMessage = async () => {
   if (!messageToDelete.value) return;
   await deleteDoc(doc(db, 'contact_messages', messageToDelete.value.id));
+
+ // Log delete action
+  await logContactAction('deleted', messageToDelete.value.email, messageToDelete.value.message.slice(0, 50));
+
   showDeleteModal.value = false;
   refreshMessages();
 };
 
 const deleteBatchMessages = async () => {
   const ids = Array.from(selectedIds.value);
-  await Promise.all(ids.map(id => deleteDoc(doc(db, 'contact_messages', id))));
+
+  for (const id of ids) {
+    const msg = messages.value.find(m => m.id === id);
+    if (msg) {
+      await deleteDoc(doc(db, 'contact_messages', id));
+      await logContactAction('deleted', msg.email, msg.message.slice(0, 50));
+    }
+  }
+
   showBatchDeleteModal.value = false;
   selectedIds.value.clear();
   refreshMessages();
 };
 
+
 const toggleSelection = (id) => {
   selectedIds.value.has(id) ? selectedIds.value.delete(id) : selectedIds.value.add(id);
 };
+
+const showReplyModal = ref(false);
+const selectedReplyMessage = ref(null);
+const replySubject = ref('');
+const replyBody = ref('');
+
+const openReplyModal = (msg) => {
+  selectedReplyMessage.value = msg;
+  replySubject.value = `Re: Your message to Eco-Mist`;
+  replyBody.value = '';
+  showReplyModal.value = true;
+};
+
+
+const sendReply = async () => {
+  const user = auth.currentUser;
+  if (!user) {
+    alert('You must be logged in as admin to send replies.');
+    return;
+  }
+
+  const idToken = await user.getIdToken();
+
+  const formData = new FormData();
+  formData.append('to', selectedReplyMessage.value.email);
+  formData.append('subject', replySubject.value);
+  formData.append('body', replyBody.value);
+  if (attachedFile.value) {
+    formData.append('file', attachedFile.value);
+  }
+
+  const res = await fetch('http://localhost:5000/send-reply', {
+    method: 'POST',
+    body: formData,
+    headers: {
+      Authorization: `Bearer ${idToken}`
+    }
+  });
+
+  const result = await res.json();
+  if (res.ok) {
+    await logContactReply(selectedReplyMessage.value.email, replySubject.value); // ✅ Log action
+    alert('✅ Reply sent successfully!');
+    showReplyModal.value = false;
+  } else {
+    alert('❌ Failed to send reply: ' + result.error);
+  }
+};
+
+
+const attachedFile = ref(null);
+
+const handleFileUpload = (event) => {
+  attachedFile.value = event.target.files[0];
+};
+
+const logContactAction = async (action, targetEmail, subject = '') => {
+  const admin = auth.currentUser;
+  if (!admin) return;
+
+  const logRef = collection(db, 'contact_logs');
+  await addDoc(logRef, {
+    action,              // e.g., 'replied', 'viewed', 'deleted'
+    recipient: targetEmail,
+    subject: subject || null,
+    by: admin.email,
+    timestamp: serverTimestamp()
+  });
+};
+
 </script>
 
 <style scoped>

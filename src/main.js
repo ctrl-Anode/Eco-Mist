@@ -50,11 +50,16 @@ if ('serviceWorker' in navigator) {
 
 
 // Handle incoming messages
-onMessageListener().then((payload) => {
-  console.log("Notification received:", payload);
-  // Display notification using Toast or any other UI component
-  const { title, body } = payload.notification;
-  app.$toast.info(`${title}: ${body}`);
+onAuthStateChanged(auth, () => {
+  if (!app) {
+    app = createApp(App).use(router).use(Toast, toastOptions).mount("#app");
+
+    // ✅ Now app is defined — safe to use
+    onMessageListener().then((payload) => {
+      const { title, body } = payload.notification;
+      app.$toast.info(`${title}: ${body}`);
+    });
+  }
 });
 
 

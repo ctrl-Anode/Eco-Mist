@@ -29,6 +29,8 @@ import EcoAdmin_GuestContacts from './components/EcoAdmin/EcoAdmin_Child/EcoAdmi
 import EcoAdmin_DeviceLogs from './components/EcoAdmin/EcoAdmin_Child/EcoAdmin_DeviceLogs.vue';
 import EcoAdmin_DeviceManagement from './components/EcoAdmin/EcoAdmin_Child/EcoAdmin_DeviceManagement.vue';
 import EcoAdmin_SystemLogs from './components/EcoAdmin/EcoAdmin_Child/EcoAdmin_SystemLogs.vue';
+import EcoAdmin_SMTP from './components/EcoAdmin/EcoAdmin_Child/EcoAdmin_SMTP.vue';
+import EcoAdmin_Logger from './components/EcoAdmin/EcoAdmin_Child/EcoAdmin_Logger.vue';
 
 const routes = [
   { path: '/', name: 'LandingPage', component: LandingPage },
@@ -76,6 +78,8 @@ const routes = [
        { path: 'device-logs', component: EcoAdmin_DeviceLogs, meta: { requiresAuth: true, role: 'admin'} },
        { path: 'device-management', component: EcoAdmin_DeviceManagement, meta: { requiresAuth: true, role: 'admin'} },
        { path: 'system-logs', component: EcoAdmin_SystemLogs, meta: { requiresAuth: true, role: 'admin'} },
+       { path: 'smtp-settings', component: EcoAdmin_SMTP, meta: { requiresAuth: true, role: 'admin' } },
+       { path: 'logger', component: EcoAdmin_Logger, meta: { requiresAuth: true, role: 'admin' } },
      ]
   },
 ];

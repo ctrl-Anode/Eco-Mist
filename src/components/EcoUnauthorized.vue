@@ -35,7 +35,7 @@ const auth = getAuth();
 const logout = async () => {
   try {
     await signOut(auth);
-    router.push('/login');
+    router.push('/auth');
   } catch (error) {
     console.error("Error logging out:", error);
   }

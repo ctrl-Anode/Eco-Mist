@@ -118,7 +118,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
-import { db } from '../firebase'
+import { db } from '../../../firebase'
 import { getAuth } from 'firebase/auth'
 import { computed } from 'vue'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'

@@ -7,10 +7,21 @@ import io
 import logging
 import firebase_admin
 from firebase_admin import messaging
-from firebase_admin import credentials, auth as firebase_auth
+from firebase_admin import credentials, auth as firebase_auth, firestore
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from datetime import datetime
+from flask import request
+from email.mime.base import MIMEBase
+from email import encoders
+
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 587
 
 cred = credentials.Certificate("firebase-admin-sdk.json")  # your actual file
 firebase_admin.initialize_app(cred)
+db = firestore.client()
 
 # Configure logging
 logging.basicConfig(
@@ -168,9 +179,143 @@ def send_notification():
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+    
+def send_breach_email(uid, to_email, sensor_name, device_name, value, threshold):
+    try:
+        # 🔍 Get sender account from Firestore
+        doc_ref = db.collection("mail_senders").document(uid)
+        doc_data = doc_ref.get().to_dict()
+
+        if not doc_data or 'accounts' not in doc_data or 'defaultEmail' not in doc_data:
+            raise ValueError("Sender credentials not configured")
+
+        default_email = doc_data['defaultEmail']
+        sender_account = next((acc for acc in doc_data['accounts'] if acc['email'] == default_email), None)
+
+        if not sender_account:
+            raise ValueError("Default sender not found")
+
+        sender_email = sender_account['email']
+        app_password = sender_account['appPassword']
+
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        subject = f"⚠️ Breach Alert: {sensor_name} on Your Device"
+        body = f"""
+        Hello,
+
+        A sensor on your device has exceeded the set threshold.
+
+        🧪 Sensor: {sensor_name}
+        📈 Current Value: {value}
+        🚫 Threshold: {threshold}
+        📟 Device: {device_name}
+        🕒 Time: {timestamp}
+
+        Please take immediate action to address this issue!
+        Check your Eco-Mist dashboard for more details.
+
+        Regards,  
+        Eco-Mist Monitoring System
+        """
+
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = to_email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, "plain"))
+
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(sender_email, app_password)
+            server.sendmail(sender_email, to_email, msg.as_string())
+
+        logger.info(f"📧 Breach email sent to {to_email} from {sender_email}")
+
+    except Exception as e:
+        logger.error(f"❌ Failed to send breach email: {e}")
+        raise
+    
+@app.route('/breach-email', methods=['POST'])
+def breach_email():
+    try:
+        decoded_user = verify_token(request)
+        email = decoded_user.get("email")
+        uid = decoded_user.get("uid")
+
+        data = request.json
+        device_id = data.get("device_id")
+        device_name = data.get("device_name")
+        sensor_name = data.get("sensor_name")
+        value = data.get("value")
+        threshold = data.get("threshold")
+
+        if not all([email, device_name, sensor_name, value, threshold]):
+            return jsonify({"error": "Missing required fields"}), 400
+
+        send_breach_email(uid, email, sensor_name, device_name, value, threshold)
+        return jsonify({"success": True}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/send-reply', methods=['POST'])
+def send_reply():
+    try:
+        # 🔐 Verify Admin
+        decoded_user = verify_token(request)
+        uid = decoded_user["uid"]
+
+        # 📤 Email fields
+        to_email = request.form.get('to')
+        subject = request.form.get('subject')
+        body = request.form.get('body')
+        file = request.files.get('file')
+
+        # 🔍 Get sender credentials from Firestore
+        doc_ref = db.collection("mail_senders").document(uid)
+        doc_data = doc_ref.get().to_dict()
+
+        if not doc_data or 'accounts' not in doc_data or 'defaultEmail' not in doc_data:
+            return jsonify({'error': 'No sender credentials configured'}), 400
+
+        default_email = doc_data['defaultEmail']
+        sender_account = next((acc for acc in doc_data['accounts'] if acc['email'] == default_email), None)
+
+        if not sender_account:
+            return jsonify({'error': 'Default sender not found'}), 400
+
+        sender_email = sender_account['email']
+        app_password = sender_account['appPassword']
+
+        # 📧 Build email message
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = to_email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain'))
+
+        if file:
+            part = MIMEBase('application', 'octet-stream')
+            part.set_payload(file.read())
+            encoders.encode_base64(part)
+            part.add_header('Content-Disposition', f'attachment; filename="{file.filename}"')
+            msg.attach(part)
+
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(sender_email, app_password)
+            server.send_message(msg)
+
+        logger.info(f"📤 Email sent from {sender_email} to {to_email}")
+        return jsonify({'message': 'Email sent successfully'})
+
+    except Exception as e:
+        logger.error(f"❌ Email sending failed: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 
 # Main entry point
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
-#CORS(app, origins=["http://localhost:5173"])  # or your production URL
+#CORS(app, origins=["http://localhost:5173"])  # or your production URL  

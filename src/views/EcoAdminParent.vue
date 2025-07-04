@@ -122,6 +122,8 @@ const navigationSections = computed(() => [
     title: 'ADMIN MANAGEMENT',
     routes: [
       { path: '/admin/settings/profile-display', name: 'Settings', meta: { requiresAuth: true } },
+      { path: '/admin/smtp-settings', name: 'SMTP', meta: { requiresAuth: true } },
+      { path: '/admin/logger', name: 'Logger', meta: { requiresAuth: true } },
     ]
   },
   {
