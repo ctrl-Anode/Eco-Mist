@@ -32,22 +32,25 @@ import EcoAdmin_SystemLogs from './components/EcoAdmin/EcoAdmin_Child/EcoAdmin_S
 import EcoAdmin_SMTP from './components/EcoAdmin/EcoAdmin_Child/EcoAdmin_SMTP.vue';
 import EcoAdmin_Logger from './components/EcoAdmin/EcoAdmin_Child/EcoAdmin_Logger.vue';
 
+import EcoUnAuth from './components/EcoUnauthorized.vue';
+
 const routes = [
   { path: '/', name: 'LandingPage', component: LandingPage },
   { path: '/auth', name: 'UserAuth', component: UserAuth },
   { path: '/try', name: 'EcoTry', component: EcoTry },
+  { path: '/unauthorized', name: 'EcoUnAuth', component: EcoUnAuth },
 
   {  // 🔹Tryyyyy EcoUserLayout for User Profile Display
   path: '/user',
     component: EcoUserParent,
     meta: { requiresAuth: true, role: 'user' },
     children: [
-      { path: 'profile-display', component: EcoProfilePage, meta: { requiresAuth: true}, role: 'user' },
+      { path: 'profile-display', component: EcoProfilePage, meta: { requiresAuth: true, role: 'user' }},
       { path: 'dashboard', component: SampleDashboard, meta: { requiresAuth: true, role: 'user' } },
-      { path: 'messenger', component: SampleMessenger, meta: { requiresAuth: true}, role: 'user' },
+      { path: 'messenger', component: SampleMessenger, meta: { requiresAuth: true, role: 'user' }},
       { path: 'model', component: SampleDetector, meta: { requiresAuth: true, role: 'user' } },
       { path: 'financial-management', component: SampleFinancial, meta: { requiresAuth: true, role: 'user' } },
-      { path: 'sensor_data', component: SampleSensor, meta: { requiresAuth: true, role: 'user', role: 'user' } },
+      { path: 'sensor_data', component: SampleSensor, meta: { requiresAuth: true, role: 'user' } },
       { path: 'settings', component: EcoSettingsParent, meta: { requiresAuth: true, role: 'user' },
         children: [
          { path: 'profile-display', component: EcoProfilePage, meta: { requiresAuth: true, role: 'user' } },
@@ -106,7 +109,7 @@ router.beforeEach(async (to, from, next) => {
 
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     if (!user) {
-      console.warn("Unauthorized access attempt. Redirecting to /auth.");
+      console.warn("Unauthorized access attempt. Redirecting to auth.");
       next("/auth");
       return;
     }
@@ -119,8 +122,8 @@ router.beforeEach(async (to, from, next) => {
         const userRole = userSnap.data().role;
 
         if (to.meta.role && to.meta.role !== userRole) {
-          console.warn(`Access denied for role: ${userRole}. Redirecting to /admin/dashboard.`);
-          next("/admin/dashboard");
+          console.warn(`Access denied for role: ${userRole}. Redirecting....`);
+          next("/unauthorized");
           return;
         }
 

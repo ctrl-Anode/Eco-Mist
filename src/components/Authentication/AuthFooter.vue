@@ -5,23 +5,15 @@
     >
       <div class="text-center">
         <p class="text-gray-100">© 2025 Eco-Mist. All rights reserved.</p>
-        <div class="flex justify-center space-x-6 mt-4">
-          <a
-            href="#"
-            class="text-gray-200 hover:text-green-400 transition-colors text-sm"
-            >Privacy Policy</a
-          >
-          <a
-            href="#"
-            class="text-gray-200 hover:text-green-400 transition-colors text-sm"
-            >Terms of Service</a
-          >
-          <a
-            href="#"
-            class="text-gray-200 hover:text-green-400 transition-colors text-sm"
-            >Contact Support</a
-          >
-        </div>
+        <p class="text-xs text-white/60 mt-2 mb-2">
+  <a href="https://policies.google.com/privacy" target="_blank" class="underline">Privacy Policy</a> and
+  <a href="https://policies.google.com/terms" target="_blank" class="underline">Terms of Service</a> apply.
+</p>
+<p class="text-[10px] text-gray-50">
+  This site is protected by reCAPTCHA and the Google
+</p>
+
+
       </div>
     </div>
   </footer>

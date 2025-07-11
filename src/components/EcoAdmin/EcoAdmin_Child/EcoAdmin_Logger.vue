@@ -36,11 +36,12 @@ import { ref, computed } from 'vue'
 // 👇 Import your logger components
 import SMTP_Logger from '../Logger/SMTP_Logger.vue'
 import Contact_Logger from '../Logger/Contact_Logger.vue'
-
+import Auth_Logger from '../Logger/Auth_Logger.vue'
 // 🔖 Define tab options
 const tabs = [
   { name: 'smtp', label: 'SMTP Logs', component: SMTP_Logger },
-  { name: 'contact', label: 'Contact Reply Logs', component: Contact_Logger }
+  { name: 'contact', label: 'Contact Reply Logs', component: Contact_Logger },
+  { name: 'auth', label: 'Authentication Logs', component: Auth_Logger }
 ]
 
 const activeTab = ref('smtp')

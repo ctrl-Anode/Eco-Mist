@@ -15,6 +15,7 @@ from datetime import datetime
 from flask import request
 from email.mime.base import MIMEBase
 from email import encoders
+import requests
 
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
@@ -22,7 +23,7 @@ SMTP_PORT = 587
 cred = credentials.Certificate("firebase-admin-sdk.json")  # your actual file
 firebase_admin.initialize_app(cred)
 db = firestore.client()
-
+RECAPTCHA_SECRET_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -314,6 +315,20 @@ def send_reply():
         logger.error(f"❌ Email sending failed: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+@app.route('/verify-recaptcha', methods=['POST'])
+def verify_recaptcha():
+    data = request.get_json()
+    token = data.get('token')
+
+    response = requests.post(
+        'https://www.google.com/recaptcha/api/siteverify',
+        data={
+            'secret': RECAPTCHA_SECRET_KEY,
+            'response': token
+        }
+    )
+    result = response.json()
+    return jsonify(result)
 
 # Main entry point
 if __name__ == '__main__':

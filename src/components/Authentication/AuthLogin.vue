@@ -172,6 +172,7 @@
       @close="showResetPasswordModal = false"
     />
 
+
     <!-- Notification -->
     <div
       v-if="notification.show"
@@ -193,6 +194,23 @@ import { auth } from "../../firebase";
 import { doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore"; // Added updateDoc and increment
 import { db } from "../../firebase";
 import ResetPasswordModal from "./AuthResetPassword.vue";
+import { useToast } from "vue-toastification";
+import { useReCaptcha } from 'vue-recaptcha-v3';
+import { logAuthEvent } from "../../utils/logAuthEvent";
+
+const { executeRecaptcha } = useReCaptcha();
+
+
+const email = ref("");
+const password = ref("");
+const toast = useToast();
+
+const MAX_ATTEMPTS = 5;
+const COOLDOWN_SECONDS = 30;
+
+const getLoginAttempts = () => parseInt(localStorage.getItem("loginAttempts") || "0");
+const getCooldownTime = () => parseInt(localStorage.getItem("cooldownTime") || "0");
+
 
 // Define reactive state for login errors
 const loginErrors = reactive({
@@ -228,36 +246,78 @@ const loginUser = async () => {
     return;
   }
 
+  // 🔐 Execute reCAPTCHA
+  const token = await executeRecaptcha('login');
+  try {
+    const recaptchaRes = await fetch("http://localhost:5000/verify-recaptcha", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+    const result = await recaptchaRes.json();
+
+    if (!result.success || result.score < 0.5) {
+      toast.error("reCAPTCHA failed. Please try again later.");
+      return;
+    }
+  } catch (err) {
+    console.error("reCAPTCHA verification error:", err);
+    toast.error("reCAPTCHA verification failed. Please try again.");
+    return;
+  }
+
+  if (isCooldown()) {
+    const secondsLeft = Math.ceil((getCooldownTime() - Date.now()) / 1000);
+    notification.value = {
+      show: true,
+      message: `Too many failed attempts. Try again in ${secondsLeft}s.`,
+      type: "error",
+    };
+    return;
+  }
+
   loading.value = true;
   try {
     const { user } = await signInWithEmailAndPassword(auth, loginForm.email, loginForm.password);
 
     if (!user.emailVerified) {
-      await sendEmailVerification(user); // Automatically resend the verification email
+      await sendEmailVerification(user);
       notification.value = {
         show: true,
-        message: "Verification email resent successfully. Please check your inbox.",
+        message: "Verification email resent. Please check your inbox.",
         type: "success",
       };
-      await signOut(auth); // Sign out the user after sending the email
+      await logAuthEvent({
+  type: "login",
+  status: "failed",
+  email: loginForm.email,
+  reason: "email-not-verified",
+  uid: user.uid,
+});
+
+      await signOut(auth);
       loginErrors.email = "Please verify your email.";
       return;
     }
 
-    // Fetch user role from Firestore
     const userRef = doc(db, "users", user.uid);
     const userSnap = await getDoc(userRef);
 
     if (userSnap.exists()) {
       const userRole = userSnap.data().role;
       localStorage.setItem("userRole", userRole);
+      localStorage.removeItem("loginAttempts");
+      localStorage.removeItem("cooldownTime");
 
-      // Redirect based on role
-      if (userRole === "admin") {
-        router.push("/admin/dashboard");
-      } else {
-        router.push("/user/dashboard");
-      }
+      await logAuthEvent({
+  type: "login",
+  status: "success",
+  email: loginForm.email,
+  uid: user.uid,
+});
+
+
+      router.push(userRole === "admin" ? "/admin/dashboard" : "/user/dashboard");
     } else {
       notification.value = {
         show: true,
@@ -266,27 +326,46 @@ const loginUser = async () => {
       };
     }
   } catch (error) {
+    await logAuthEvent({
+  type: "login",
+  status: "failed",
+  email: loginForm.email,
+  reason: error.code || "unknown-error",
+});
+
     console.error(error);
-    if (error.code === "auth/user-not-found") {
-      loginErrors.email = "No account found with this email.";
-    } else if (error.code === "auth/wrong-password") {
-      loginErrors.password = "Incorrect password.";
-    } else {
+    let attempts = getLoginAttempts() + 1;
+    localStorage.setItem("loginAttempts", attempts);
+
+    if (attempts >= MAX_ATTEMPTS) {
+      const cooldownUntil = Date.now() + COOLDOWN_SECONDS * 1000;
+      localStorage.setItem("cooldownTime", cooldownUntil);
       notification.value = {
         show: true,
-        message: "Login failed. Please try again.",
+        message: `Too many failed login attempts. Login disabled for ${COOLDOWN_SECONDS}s.`,
         type: "error",
       };
+    } else {
+      if (error.code === "auth/user-not-found") {
+        loginErrors.email = "No account found with this email.";
+      } else if (error.code === "auth/wrong-password") {
+        loginErrors.password = "Incorrect password.";
+      } else {
+        notification.value = {
+          show: true,
+          message: "Login failed. Please try again.",
+          type: "error",
+        };
+      }
     }
   } finally {
     loading.value = false;
-
-    // Hide notification after 3 seconds
     setTimeout(() => {
       notification.value.show = false;
     }, 3000);
   }
 };
+
 
 const router = useRouter();
 
@@ -314,8 +393,21 @@ const handleGoogleSignIn = async () => {
     }
 
     localStorage.setItem("userRole", userSnap.exists() ? userSnap.data().role : "user");
+    await logAuthEvent({
+  type: "login",
+  status: "success",
+  email: loginForm.email,
+  uid: user.uid,
+});
     router.push(userSnap.exists() && userSnap.data().role === "admin" ? "/admin/dashboard" : "/user/dashboard");
   } catch (error) {
+    await logAuthEvent({
+  type: "login",
+  status: "failed",
+  email: loginForm.email,
+  reason: error.code || "unknown-error",
+});
+
     console.error(error);
     alert(error.message || "Google Sign-In failed!");
   }
@@ -340,6 +432,13 @@ const resendEmailVerification = async () => {
     showAlert("success", "Verification Email Sent", "Please check your inbox.");
     await signOut(auth);
   } catch (error) {
+    await logAuthEvent({
+  type: "login",
+  status: "failed",
+  email: loginForm.email,
+  reason: error.code || "unknown-error",
+});
+
     console.error(error);
     if (error.code === "auth/user-not-found") {
       loginErrors.email = "No account found with this email.";
@@ -352,4 +451,23 @@ const resendEmailVerification = async () => {
     loading.value = false;
   }
 };
+
+const isCooldown = () => {
+  const now = Date.now();
+  const cooldownUntil = getCooldownTime();
+  return now < cooldownUntil;
+};
+
+
 </script>
+
+<style>
+
+.grecaptcha-badge {
+  transform: scale(0.5);
+  transform-origin: bottom right;
+  bottom: 8px !important;
+  right: 8px !important;
+  z-index: 1000;
+}
+</style>

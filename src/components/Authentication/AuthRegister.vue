@@ -352,15 +352,19 @@
   </section>
 </template>
 
-
-
 <script setup>
-import { reactive, ref, computed, onMounted } from "vue";
+import { reactive, ref, computed, onMounted} from "vue";
 import { useRouter } from "vue-router";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase"; // Adjust path as needed
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { useToast } from "vue-toastification";
+import { logAuthEvent } from "../../utils/logAuthEvent";
+const toast = useToast();
+
+
+const emit = defineEmits(['toggleView', 'showTerms', 'showPrivacy']);
 
 const router = useRouter();
 ///add
@@ -510,11 +514,34 @@ const handleRegister = async () => {
     globalAlert.show = true;
     showVerificationPrompt.value = true;
 
-    //resetForm(); 
+    await logAuthEvent({
+  type: "register",
+  status: "success",
+  email: registerForm.email,
+  uid: user.uid,
+  method: "email",
+});
+
+
+    resetForm(); 
+
     setTimeout(() => {
-      router.push("/auth");
-    }, 3000);
+      globalAlert.message = "Account created successfully! Please verify your email.";
+      toast.success("📩 A verification link has been sent to your Gmail. Please verify before logging in.");
+      globalAlert.type = "success";
+      globalAlert.show = true;
+showVerificationPrompt.value = true;
+
+  emit('toggleView'); // ✅ This tells the parent to show the Login page
+}, 1000);
   } catch (error) {
+    await logAuthEvent({
+  type: "register",
+  status: "failed",
+  email: registerForm.email,
+  reason: error.code || error.message,
+});
+
     globalAlert.message = error.message || "Registration failed.";
     globalAlert.type = "error";
     globalAlert.show = true;
@@ -558,8 +585,25 @@ const handleGoogleSignUp = async () => {
     globalAlert.type = "success";
     globalAlert.show = true;
 
+    await logAuthEvent({
+  type: "register",
+  status: "success",
+  email: user.email,
+  uid: user.uid,
+  method: "google",
+});
+
+
     router.push("/user/dashboard");
   } catch (err) {
+    await logAuthEvent({
+  type: "register",
+  status: "failed",
+  email: "", // user might not exist yet
+  reason: err.code || err.message,
+  method: "google",
+});
+
     globalAlert.message = err.message || "Google Sign-In failed.";
     globalAlert.type = "error";
     globalAlert.show = true;

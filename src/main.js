@@ -6,6 +6,10 @@ import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
 import { requestFcmToken, onMessageListener } from "./firebase";
 
+import { VueReCaptcha } from 'vue-recaptcha-v3'
+
+const SITE_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
+
 import App from './App.vue'
 
 const auth = getAuth();
@@ -27,18 +31,42 @@ const toastOptions = {
 let app;
 onAuthStateChanged(auth, () => {
   if (!app) {
-    app = createApp(App).use(router).use(Toast, toastOptions).mount("#app");
+    app = createApp(App)
+      .use(router)
+      .use(Toast, toastOptions)
+      .use(VueReCaptcha, { siteKey: SITE_KEY })
+      .mount("#app");
+
+      router.afterEach((to) => {
+  setTimeout(() => {
+    const badge = document.querySelector(".grecaptcha-badge");
+    if (!badge) return;
+
+    const visibleRoutes = ["/auth"];
+    if (visibleRoutes.includes(to.path)) {
+      badge.style.display = "block";
+    } else {
+      badge.style.display = "none";
+    }
+  }, 1000);
+});
+
+    // ✅ Handle incoming FCM messages
+    onMessageListener().then((payload) => {
+      const { title, body } = payload.notification;
+      app.config.globalProperties.$toast.info(`${title}: ${body}`);
+    });
   }
 });
 
-// ✅ Ensure Dark Mode is applied when app loads
+// ✅ Apply dark mode on load
 if (localStorage.getItem("darkMode") === "true") {
   document.documentElement.classList.add("dark");
 } else {
   document.documentElement.classList.remove("dark");
 }
 
-// Request FCM token
+// ✅ Request FCM token
 if ('serviceWorker' in navigator) {
   requestFcmToken().then((token) => {
     if (token) {
@@ -47,20 +75,5 @@ if ('serviceWorker' in navigator) {
     }
   });
 }
-
-
-// Handle incoming messages
-onAuthStateChanged(auth, () => {
-  if (!app) {
-    app = createApp(App).use(router).use(Toast, toastOptions).mount("#app");
-
-    // ✅ Now app is defined — safe to use
-    onMessageListener().then((payload) => {
-      const { title, body } = payload.notification;
-      app.$toast.info(`${title}: ${body}`);
-    });
-  }
-});
-
 
 //google authinticator/nodemailer

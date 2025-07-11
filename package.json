@@ -11,6 +11,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.0.14",
     "@tensorflow/tfjs": "^4.22.0",
+    "@unhead/vue": "^2.0.12",
     "axios": "^1.8.3",
     "chart.js": "^4.4.9",
     "core-js": "^3.8.3",

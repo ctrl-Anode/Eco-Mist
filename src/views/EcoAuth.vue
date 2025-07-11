@@ -111,7 +111,7 @@
     </AuthPrivacy>
 
     <!-- Footer -->
-    <AuthFooter />
+    <AuthFooter/>
   </div>
 </template>
 
