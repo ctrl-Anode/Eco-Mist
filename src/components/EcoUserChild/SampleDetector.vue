@@ -10,6 +10,18 @@
           </div>
         </div>
 
+        <div class="mb-4">
+  <label for="modelSelect" class="block text-sm font-medium text-gray-700 mb-1">🧠 Choose Model</label>
+  <select
+    id="modelSelect"
+    v-model="selectedModel"
+    class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+  >
+    <option value="v2">🌿 LettuceModel V2</option>
+    <option value="v3">🌿 LettuceModel V3</option>
+  </select>
+</div>
+
         <!-- Model Information -->
         <div v-if="modelInfo" class="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-4 border border-emerald-200">
           <h3 class="text-lg font-semibold text-emerald-800 mb-3">Model Information</h3>
@@ -272,38 +284,83 @@
               <h3 class="text-2xl font-bold text-gray-900 mb-4">📋 Analysis Results</h3>
               
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="space-y-4">
-                  <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
-                    <h4 class="text-lg font-semibold text-emerald-800 mb-2">Prediction</h4>
-                    <p class="text-2xl font-bold text-emerald-900">{{ result.prediction }}</p>
-                    <p class="text-emerald-700">Confidence: {{ (result.confidence * 100).toFixed(2) }}%</p>
-                  </div>
+  <!-- Result Summary -->
+  <div class="space-y-4">
+    <div class="bg-emerald-50 rounded-xl p-5 border border-emerald-200">
+      <div class="flex items-center gap-3">
+        <div class="text-4xl">
+          <span v-if="result.prediction === 'Healthy'">✅</span>
+          <span v-else-if="result.prediction === 'Bacterial'">🦠</span>
+          <span v-else-if="result.prediction === 'Fungal'">🍄</span>
+          <span v-else-if="result.prediction === 'Mosaic Virus'">🧬</span>
+          <span v-else-if="result.prediction === 'Nutrient Deficiency'">🧬</span>
+          <span v-else-if="result.prediction === 'Not Lettuce'">🚫</span>
+          <span v-else-if="result.prediction === 'Cannot Classify'">🚫</span>
+          <span v-else>📌</span>
+        </div>
+        <div>
+          <h4 class="text-2xl font-bold text-emerald-800">{{ result.prediction }}</h4>
+          <p class="text-sm text-gray-600">
+            Confidence:
+            <span :class="{
+              'text-green-600': result.confidence >= 0.8,
+              'text-yellow-600': result.confidence >= 0.5 && result.confidence < 0.8,
+              'text-red-600': result.confidence < 0.5
+            }">
+              {{ (result.confidence * 100).toFixed(2) }}%
+            </span>
+          </p>
+          <div class="text-xs text-gray-500 mt-1">
+  Model:
+  <strong>{{ result.modelUsed?.toUpperCase() || selectedModel.toUpperCase() }}</strong>
+  <span v-if="modelInfo?.version" class="ml-2 text-gray-400">(v{{ modelInfo.version }})</span>
+</div>
 
-                  <div v-if="result.fallback_used" class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-                    <div class="flex items-center">
-                      <svg class="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
-                      <span class="text-yellow-800 font-medium">Low Confidence Result</span>
-                    </div>
-                    <p class="text-yellow-700 mt-1 text-sm">Unable to confidently classify. Try a clearer image or different angle.</p>
-                  </div>
-                </div>
+        </div>
+      </div>
+    </div>
 
-                <div class="space-y-4">
-                  <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                    <h4 class="text-lg font-semibold text-blue-800 mb-3">Recommendations</h4>
-                    <ul class="space-y-2">
-                      <li v-for="(rec, i) in result.recommendations" :key="i" class="flex items-start">
-                        <svg class="w-4 h-4 text-blue-600 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
-                        </svg>
-                        <span class="text-blue-800 text-sm">{{ rec }}</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
+    <!-- Fallback Warning -->
+    <div v-if="result.fallback_used" class="bg-yellow-100 border-l-4 border-yellow-500 p-4 rounded-lg">
+      <p class="text-yellow-800 font-medium">⚠️ Low Confidence Prediction</p>
+      <p class="text-sm text-yellow-700">The model could not confidently classify this image. Consider uploading a clearer image.</p>
+    </div>
+  </div>
+
+  <!-- Recommendations Section -->
+  <div class="bg-blue-50 rounded-xl p-5 border border-blue-200">
+    <h4 class="text-lg font-bold text-blue-800 mb-3">📝 Recommendations</h4>
+
+    <!-- Status Type -->
+    <div v-if="result.recommendations?.steps && !result.recommendations?.diseases">
+      <p class="text-gray-700 mb-2">{{ result.recommendations.description }}</p>
+      <ul class="list-disc list-inside text-sm text-gray-700">
+        <li v-for="(step, idx) in result.recommendations.steps" :key="idx">{{ step }}</li>
+      </ul>
+    </div>
+
+    <!-- Disease Type -->
+    <div v-else-if="result.recommendations?.diseases">
+      <div v-for="(disease, i) in result.recommendations.diseases" :key="i" class="mb-4">
+        <h5 class="text-md font-semibold text-blue-700">{{ disease.name }}</h5>
+        <p class="text-sm text-gray-600">{{ disease.description }}</p>
+
+        <div v-for="(treatment, tIdx) in disease.treatments" :key="tIdx" class="ml-3 mt-2">
+          <p class="text-sm font-medium text-blue-500 mb-1">{{ treatment.label }} Treatment</p>
+          <ul class="list-disc list-inside text-sm text-gray-700">
+            <li v-for="(step, idx) in treatment.steps" :key="idx">{{ step }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fallback -->
+    <div v-else>
+      <p class="text-sm text-gray-500 italic">No recommendations available.</p>
+    </div>
+  </div>
+</div>
+
             </div>
 
             <!-- Comparison Results -->
@@ -363,6 +420,30 @@
 
           <!-- Insights Tab -->
           <div v-if="activeTab === 'Insights'" class="space-y-8">
+            <div class="flex flex-wrap gap-4 items-center mb-6">
+  <select v-model="insightsModelFilter" class="px-3 py-2 border rounded-lg">
+    <option value="">All Models</option>
+    <option value="v2">LettuceModel V2</option>
+    <option value="v3">LettuceModel V3</option>
+  </select>
+
+  <select v-model="insightsModeFilter" class="px-3 py-2 border rounded-lg">
+    <option value="">All Modes</option>
+    <option value="single">Single Image</option>
+    <option value="compare">Comparison</option>
+  </select>
+
+  <input type="date" v-model="startDate" class="px-3 py-2 border rounded-lg" />
+  <input type="date" v-model="endDate" class="px-3 py-2 border rounded-lg" />
+</div>
+
+<p class="text-sm text-gray-600 mb-4">
+  Showing {{ insights.total }} scans 
+  <span v-if="insightsModelFilter">for Model: {{ insightsModelFilter.toUpperCase() }}</span>
+  <span v-if="insightsModeFilter"> | Mode: {{ insightsModeFilter }}</span>
+  <span v-if="startDate && endDate"> | Between: {{ startDate }} and {{ endDate }}</span>
+</p>
+
             <!-- Export Button -->
             <div class="flex justify-end">
               <button
@@ -517,15 +598,23 @@
 
   <transition name="fade">
     <div v-if="showHistorySection">
-      <!-- Filter -->
-      <div class="mb-4">
-        <input
-          type="text"
-          v-model="historyFilter"
-          placeholder="🔍 Filter by prediction..."
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        />
-      </div>
+      <!-- Filter Controls -->
+<div class="mb-4 flex flex-col sm:flex-row sm:items-center gap-2">
+  <input
+    type="text"
+    v-model="historyFilter"
+    placeholder="🔍 Filter by prediction..."
+    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+  />
+  <select
+    v-model="historyModelFilter"
+    class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+  >
+    <option value="">All Models</option>
+    <option value="v2">LettuceModel V2</option>
+    <option value="v3">LettuceModel V3</option>
+  </select>
+</div>
 
       <!-- Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -538,6 +627,7 @@
             <div class="flex-1">
               <p class="font-semibold text-gray-900">{{ item.prediction }}</p>
               <p class="text-sm text-emerald-600 font-medium">{{ (item.confidence * 100).toFixed(2) }}% confidence</p>
+              <p class="text-xs text-gray-500">Model: {{ item.modelUsed?.toUpperCase() || 'V2' }}</p>
               <p class="text-xs text-gray-500 mt-1">
                 {{
                   item.createdAt?.toDate?.().toLocaleString() || 'No timestamp'
@@ -623,15 +713,24 @@
 
   <transition name="fade">
     <div v-if="showComparisonSection">
-      <!-- Filter -->
-      <div class="mb-4">
-        <input
-          type="text"
-          v-model="comparisonFilter"
-          placeholder="🔍 Filter by predictions..."
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-      </div>
+      <!-- Filter + Model Dropdown -->
+<div class="mb-4 flex flex-col sm:flex-row sm:items-center gap-2">
+  <input
+    type="text"
+    v-model="comparisonFilter"
+    placeholder="🔍 Filter by predictions..."
+    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  />
+  <select
+    v-model="comparisonModelFilter"
+    class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+  >
+    <option value="">All Models</option>
+    <option value="v2">LettuceModel V2</option>
+    <option value="v3">LettuceModel V3</option>
+  </select>
+</div>
+
 
       <!-- Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -645,6 +744,7 @@
               <p class="font-semibold text-gray-900">{{ item.prediction1 }} → {{ item.prediction2 }}</p>
               <p class="text-sm text-gray-600">{{ (item.confidence1 * 100).toFixed(1) }}% → {{ (item.confidence2 * 100).toFixed(1) }}%</p>
               <p class="text-xs text-gray-500 mt-1">{{ item.createdAt?.toDate().toLocaleString() }}</p>
+              <p class="text-xs text-gray-400">Model: {{ item.modelUsed?.toUpperCase() || 'V2' }}</p>
             </div>
             <div class="text-xs px-2 py-1 rounded-full font-semibold"
                 :class="item.progressionDetected ? 'bg-yellow-100 text-yellow-800' : 'bg-emerald-100 text-emerald-800'">
@@ -740,31 +840,71 @@
             </button>
           </div>
         </div>
-        
+        <div class="text-xs text-gray-500 mt-4 border-t pt-3">
+  <p><strong>Model:</strong> {{ selectedItem.modelUsed?.toUpperCase() || 'Unknown' }} (v{{ selectedItem.modelVersion || '1.0.0' }})</p>
+  <p><strong>Scan Mode:</strong> Single Image</p>
+  <p><strong>Analyzed:</strong> {{ selectedItem.createdAt?.toDate?.().toLocaleString() || 'N/A' }}</p>
+</div>
         <div class="p-6 space-y-4">
           <img :src="selectedItem.imageUrl" class="w-full rounded-lg shadow-md" />
           
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-emerald-50 rounded-lg p-4">
-              <p class="text-sm text-emerald-600 font-medium">Prediction</p>
-              <p class="text-lg font-bold text-emerald-900">{{ selectedItem.prediction }}</p>
-            </div>
-            <div class="bg-blue-50 rounded-lg p-4">
-              <p class="text-sm text-blue-600 font-medium">Confidence</p>
-              <p class="text-lg font-bold text-blue-900">{{ (selectedItem.confidence * 100).toFixed(2) }}%</p>
-            </div>
-          </div>
+          <!-- Top section -->
+<div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200">
+  <div class="flex items-center gap-3">
+    <span class="text-2xl">📋</span>
+    <div>
+      <p class="text-sm text-emerald-600">Prediction</p>
+      <h2 class="text-xl font-bold text-emerald-800">{{ selectedItem.prediction }}</h2>
+      <p class="text-sm text-gray-600">
+        Confidence:
+        <span :class="{
+          'text-green-600': selectedItem.confidence >= 0.8,
+          'text-yellow-600': selectedItem.confidence >= 0.5 && selectedItem.confidence < 0.8,
+          'text-red-600': selectedItem.confidence < 0.5
+        }">{{ (selectedItem.confidence * 100).toFixed(2) }}%</span>
+      </p>
+    </div>
+  </div>
+</div>
+
 
           <div class="bg-gray-50 rounded-lg p-4">
             <p class="font-medium text-gray-900 mb-3">Recommendations:</p>
-            <ul class="space-y-2">
-              <li v-for="(rec, i) in selectedItem.recommendations" :key="i" class="flex items-start">
-                <svg class="w-4 h-4 text-emerald-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
-                </svg>
-                <span class="text-gray-700 text-sm">{{ rec }}</span>
-              </li>
-            </ul>
+            <!-- Render legacy recommendation array -->
+<div v-if="Array.isArray(selectedItem.recommendations)">
+  <p class="font-medium text-gray-900 mb-3">Recommendations:</p>
+  <ul class="space-y-2">
+    <li v-for="(rec, i) in selectedItem.recommendations" :key="i" class="flex items-start">
+      <svg class="w-4 h-4 text-emerald-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 00-1.414 0L8 12.586 4.707 9.293a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l8-8a1 1 0 000-1.414z" clip-rule="evenodd"/>
+</svg>
+
+      <span class="text-gray-700 text-sm">{{ rec }}</span>
+    </li>
+  </ul>
+</div>
+
+<!-- Render structured V3 recommendations -->
+<div v-else-if="selectedItem.recommendations?.diseases">
+  <p class="font-medium text-gray-900 mb-3">Recommendations:</p>
+  <div v-for="(disease, index) in selectedItem.recommendations.diseases" :key="index" class="mb-4">
+    <h4 class="text-md font-semibold text-emerald-700">{{ disease.name }}</h4>
+    <p class="text-sm text-gray-600 mb-2">{{ disease.description }}</p>
+
+    <div v-for="(treatment, i) in disease.treatments" :key="i" class="ml-3 mb-2">
+      <p class="text-sm font-medium text-blue-600">{{ treatment.label }} Treatment</p>
+      <ul class="list-disc list-inside text-sm text-gray-700">
+        <li v-for="(step, j) in treatment.steps" :key="j">{{ step }}</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Fallback -->
+<div v-else>
+  <p class="text-sm text-gray-500 italic">No recommendations available.</p>
+</div>
+
           </div>
 
           <div class="text-xs text-gray-500 text-center pt-4 border-t border-gray-200">
@@ -794,6 +934,7 @@
             <p class="text-sm text-emerald-600 font-medium">Predicted</p>
             <p class="text-lg font-bold text-emerald-900">{{ result.prediction }}</p>
             <p class="text-sm text-emerald-700">{{ (result.confidence * 100).toFixed(2) }}% confidence</p>
+            <p class="text-xs text-gray-500">Model Used: {{ result.modelUsed?.toUpperCase() }} (v{{ modelInfo?.version || '1.0.0' }})</p>
           </div>
 
           <div class="space-y-3">
@@ -890,6 +1031,7 @@
         <p><strong>Prediction 2:</strong> {{ selectedComparison.prediction2 }}</p>
         <p><strong>Confidence 2:</strong> {{ (selectedComparison.confidence2 * 100).toFixed(1) }}%</p>
         <p><strong>Progression Detected:</strong> {{ selectedComparison.progressionDetected ? 'Yes' : 'No' }}</p>
+        <p><strong>Model Used:</strong> {{ selectedComparison.modelUsed?.toUpperCase() || 'V2' }}</p>
         <p><strong>Date:</strong>
           {{
             selectedComparison.createdAt && typeof selectedComparison.createdAt.toDate === 'function'
@@ -950,7 +1092,7 @@ import {
   auth,
   db,
   storage
-} from '../../firebase'; // your firebase.js
+} from '../firebase'; // your firebase.js
 import {
   addDoc,
   collection,
@@ -990,6 +1132,15 @@ const showDeleteConfirmComparison = ref(false);
 
 const showCameraSection = ref(false);
 
+const selectedModel = ref('v2'); // default to v2
+const historyModelFilter = ref('');
+const comparisonModelFilter = ref('');
+
+const insightsModelFilter = ref('');
+const insightsModeFilter = ref('');
+const startDate = ref('');
+const endDate = ref('');
+
 // Triggered on file selection
 
 const filePreview = vueRef(null);
@@ -1015,6 +1166,7 @@ const analyzeImage = async () => {
     // Step 1: Upload image to Flask API
     const formData = new FormData();
     formData.append('file', file.value);
+    formData.append('model', selectedModel.value);
 
     const token = await auth.currentUser.getIdToken();
 
@@ -1035,7 +1187,16 @@ const analyzeImage = async () => {
       throw new Error('Prediction failed');
     }
 
-    result.value = predictionData;
+    result.value = {
+  prediction: predictionData.prediction,
+  confidence: predictionData.confidence,
+  class_probabilities: predictionData.class_probabilities,
+  recommendations: predictionData.recommendations || [],
+  fallback_used: predictionData.fallback_used || false,
+  raw_model: predictionData.raw_model || selectedModel.value,
+  message: predictionData.message || ''
+};
+
 
     // Step 2: Upload the image to Firebase Storage
     const timestamp = Date.now();
@@ -1054,6 +1215,8 @@ const analyzeImage = async () => {
       confidence: predictionData.confidence,
       classProbabilities: predictionData.class_probabilities,
       recommendations: predictionData.recommendations,
+      modelUsed: predictionData.raw_model || selectedModel.value,
+      modelVersion: modelInfo.value?.version || '1.0.0',
       createdAt: serverTimestamp()
     });
 
@@ -1071,16 +1234,11 @@ const modelInfo = vueRef(null);
 
 const fetchModelInfo = async () => {
   try {
-    const response = await fetch('http://127.0.0.1:5000/model-info');
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.statusText}`);
-    }
+    const response = await fetch(`http://127.0.0.1:5000/model-info?model=${selectedModel.value}`);
     const data = await response.json();
     modelInfo.value = data;
-    console.log("✅ Model Info:", data);
   } catch (err) {
-    console.error("❌ Failed to fetch model info:", err);
-    showToast(`Error: ${err.message || 'Failed to fetch model info.'}`, 'bg-red-500');
+    showToast("Failed to fetch model info", 'bg-red-500');
   }
 };
 onMounted(() => {
@@ -1199,60 +1357,79 @@ const insights = ref({
   Bacterial: 0,
   Fungal: 0
 });
-import { getAuth } from 'firebase/auth';
 
 const loadInsights = async () => {
   const user = auth.currentUser;
   if (!user) return;
 
-  const q = query(
+  const singleQuery = query(
     collection(db, 'analysisHistory'),
     where('userId', '==', user.uid),
     orderBy('createdAt', 'desc')
   );
 
-  onSnapshot(q, async (snapshot) => {
-    const data = snapshot.docs.map(doc => doc.data());
+  const comparisonQuery = query(
+    collection(db, 'comparisons'),
+    where('userId', '==', user.uid),
+    orderBy('createdAt', 'desc')
+  );
 
-    const summary = { total: data.length, Healthy: 0, Bacterial: 0, Fungal: 0 };
-    const byDate = [];
-    const byLabel = {};
+  const [singleSnap, compareSnap] = await Promise.all([
+    getDocs(singleQuery),
+    getDocs(comparisonQuery)
+  ]);
 
-    data.forEach((item) => {
-      const label = item.prediction;
-      summary[label] = (summary[label] || 0) + 1;
+  let combinedData = [];
 
-      const date = item.createdAt?.toDate().toLocaleDateString?.() || 'Unknown';
-      byDate.push({ x: date, y: item.confidence });
+  if (insightsModeFilter.value !== 'compare') {
+    const singleData = singleSnap.docs.map(doc => ({ ...doc.data(), mode: 'single' }));
+    combinedData.push(...singleData);
+  }
 
-      if (!byLabel[label]) byLabel[label] = [];
-      byLabel[label].push(item.confidence);
-    });
+  if (insightsModeFilter.value !== 'single') {
+    const compareData = compareSnap.docs.map(doc => ({
+      prediction: doc.data().prediction2,
+      confidence: doc.data().confidence2,
+      recommendations: [],
+      modelUsed: doc.data().modelUsed,
+      createdAt: doc.data().createdAt,
+      mode: 'compare'
+    }));
+    combinedData.push(...compareData);
+  }
 
-    insights.value = summary;
+  // Apply filters
+  combinedData = combinedData.filter(item => {
+    const modelMatch = !insightsModelFilter.value || item.modelUsed === insightsModelFilter.value;
+    const date = item.createdAt?.toDate?.();
+    const afterStart = !startDate.value || new Date(startDate.value) <= date;
+    const beforeEnd = !endDate.value || date <= new Date(endDate.value + "T23:59:59");
 
-    await nextTick(); // 👈 ensure chart canvases are in DOM
-    if (!chartPie.value || !chartLine.value || !chartBar.value) {
-  console.warn("❌ Skipping drawCharts — chart elements are not ready.");
-  return;
-}
-    drawCharts(summary, byDate, byLabel);
-    computeDiseaseInsights(data);
-
+    return modelMatch && afterStart && beforeEnd;
   });
+
+  computeInsightsFromData(combinedData);
 };
 
-const computeDiseaseInsights = (data) => {
-  const insights = {};
+const computeInsightsFromData = async (data) => {
+  const summary = { total: data.length };
+  const trends = [];
+  const labels = {};
+  const diseaseBreakdown = {};
 
   data.forEach(item => {
     const label = item.prediction;
     const conf = item.confidence;
-    const date = item.createdAt?.toDate().toLocaleString?.() || 'Unknown';
-    const recs = item.recommendations || [];
+    const date = item.createdAt?.toDate().toLocaleDateString() || 'Unknown';
 
-    if (!insights[label]) {
-      insights[label] = {
+    summary[label] = (summary[label] || 0) + 1;
+    trends.push({ x: date, y: conf });
+
+    if (!labels[label]) labels[label] = [];
+    labels[label].push(conf);
+
+    if (!diseaseBreakdown[label]) {
+      diseaseBreakdown[label] = {
         count: 0,
         totalConfidence: 0,
         latest: date,
@@ -1260,25 +1437,34 @@ const computeDiseaseInsights = (data) => {
       };
     }
 
-    insights[label].count += 1;
-    insights[label].totalConfidence += conf;
+    diseaseBreakdown[label].count++;
+    diseaseBreakdown[label].totalConfidence += conf;
 
-    if (!insights[label].latest || new Date(date) > new Date(insights[label].latest)) {
-      insights[label].latest = date;
+    if (!diseaseBreakdown[label].latest || new Date(date) > new Date(diseaseBreakdown[label].latest)) {
+      diseaseBreakdown[label].latest = date;
     }
 
-    insights[label].recommendations.push(...recs);
+    if (Array.isArray(item.recommendations)) {
+      diseaseBreakdown[label].recommendations.push(...item.recommendations);
+    }
   });
 
-  for (const key in insights) {
-    const i = insights[key];
-    i.avgConfidence = (i.totalConfidence / i.count) * 100;
-    i.recommendations = [...new Set(i.recommendations)]; // remove duplicates
+  for (const k in diseaseBreakdown) {
+    diseaseBreakdown[k].avgConfidence = (diseaseBreakdown[k].totalConfidence / diseaseBreakdown[k].count) * 100;
+    diseaseBreakdown[k].recommendations = [...new Set(diseaseBreakdown[k].recommendations)];
   }
 
-  diseaseInsights.value = insights;
+  insights.value = summary;
+  diseaseInsights.value = diseaseBreakdown;
+
+  await nextTick(); // ✅ safe now
+  drawCharts(summary, trends, labels);
 };
 
+watch([insightsModelFilter, insightsModeFilter, startDate, endDate], ([model, mode, start, end]) => {
+  console.log('🔍 Filter Changed:', { model, mode, start, end });
+  loadInsights();
+});
 
 const drawCharts = (summary, confidenceTrend, labelGroups) => {
   // Ensure chart elements exist before creating charts
@@ -1352,24 +1538,30 @@ const exportHistoryToCSV = () => {
   if (!history.value.length) return;
 
   const headers = [
-    'Prediction',
-    'Confidence',
-    'Created At',
-    'Image URL',
-    'Recommendations',
-    'Class Probabilities',
-    'User ID'
-  ];
+  'Prediction',
+  'Confidence',
+  'Created At',
+  'Image URL',
+  'Recommendations',
+  'Class Probabilities',
+  'User ID',
+  'Model Used',
+  'Model Version'
+];
+
 
   const rows = history.value.map(item => [
-    item.prediction,
-    (item.confidence * 100).toFixed(2) + '%',
-    item.createdAt?.toDate().toLocaleString() || '',
-    item.imageUrl || '',
-    JSON.stringify(item.recommendations || []),
-    JSON.stringify(item.classProbabilities || {}),
-    item.userId || ''
-  ]);
+  item.prediction,
+  (item.confidence * 100).toFixed(2) + '%',
+  item.createdAt?.toDate().toLocaleString() || '',
+  item.imageUrl || '',
+  JSON.stringify(item.recommendations || []),
+  JSON.stringify(item.classProbabilities || {}),
+  item.userId || '',
+  item.modelUsed || 'v2',
+  item.modelVersion || '1.0.0'
+]);
+
 
   const csvContent = [
     headers.join(','),
@@ -1421,6 +1613,7 @@ const exportInsightsToPDF = async () => {
     pdf.setFontSize(14);
     pdf.text(label, 14, y += 10);
     pdf.addImage(imgData, 'PNG', 14, y += 5, 180, 90);
+ 
     y += 95;
   };
 
@@ -1542,7 +1735,7 @@ const proceedDelete = async () => {
   }
 };
 
-
+watch(selectedModel, fetchModelInfo);
 
 const clearForm = () => {
   file.value = null;
@@ -1599,6 +1792,7 @@ const analyzeComparison = async () => {
     const send = async (file) => {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('model', selectedModel.value);
 
       const res = await fetch('http://127.0.0.1:5000/predict', {
         method: 'POST',
@@ -1639,6 +1833,8 @@ const analyzeComparison = async () => {
       classProbabilities1: res1.class_probabilities,
       classProbabilities2: res2.class_probabilities,
       progressionDetected: progressionDetected.value,
+      modelUsed: res1.raw_model || selectedModel.value,
+      modelVersion: modelInfo.value?.version || '1.0.0',
       createdAt: serverTimestamp()
     });
 
@@ -1696,21 +1892,26 @@ const loadComparisonHistory = () => {
 const exportComparisonToCSV = () => {
   if (!comparisonHistory.value.length) return;
 
-  const headers = [
-    'Prediction 1', 'Confidence 1', 'Prediction 2', 'Confidence 2',
-    'Progression Detected', 'Created At', 'Image URL 1', 'Image URL 2'
-  ];
+ const headers = [
+  'Prediction 1', 'Confidence 1', 'Prediction 2', 'Confidence 2',
+  'Progression Detected', 'Created At', 'Image URL 1', 'Image URL 2',
+  'Model Used', 'Model Version'
+];
+
 
   const rows = comparisonHistory.value.map(item => [
-    item.prediction1,
-    (item.confidence1 * 100).toFixed(2) + '%',
-    item.prediction2,
-    (item.confidence2 * 100).toFixed(2) + '%',
-    item.progressionDetected ? 'Yes' : 'No',
-    item.createdAt?.toDate().toLocaleString() || '',
-    item.imageUrl1,
-    item.imageUrl2
-  ]);
+  item.prediction1,
+  (item.confidence1 * 100).toFixed(2) + '%',
+  item.prediction2,
+  (item.confidence2 * 100).toFixed(2) + '%',
+  item.progressionDetected ? 'Yes' : 'No',
+  item.createdAt?.toDate().toLocaleString() || '',
+  item.imageUrl1,
+  item.imageUrl2,
+  item.modelUsed || 'v2',
+  item.modelVersion || '1.0.0'
+]);
+
 
   const csvContent = [
     headers.join(','),
@@ -1756,6 +1957,9 @@ const exportComparisonToPDF = async () => {
     pdf.text(`Created At: ${item.createdAt?.toDate().toLocaleString() || 'N/A'}`, 18, y += 6);
     pdf.text(`Image 1: ${item.imageUrl1}`, 18, y += 6);
     pdf.text(`Image 2: ${item.imageUrl2}`, 18, y += 6);
+    pdf.text(`Model Used: ${item.modelUsed?.toUpperCase() || 'V2'}`, 18, y += 6);
+    pdf.text(`Model Version: ${item.modelVersion || '1.0.0'}`, 18, y += 6);
+
 
     y += 8;
   });
@@ -1827,7 +2031,8 @@ const itemsPerPage = 6;
 // Computed for filtered + paginated history
 const filteredHistory = computed(() =>
   history.value.filter(item =>
-    item.prediction?.toLowerCase().includes(historyFilter.value.toLowerCase())
+    item.prediction?.toLowerCase().includes(historyFilter.value.toLowerCase()) &&
+    (historyModelFilter.value === '' || (item.modelUsed || 'v2') === historyModelFilter.value)
   )
 );
 
@@ -1851,7 +2056,8 @@ const comparisonsPerPage = 6;
 
 const filteredComparisons = computed(() =>
   comparisonHistory.value.filter(item =>
-    `${item.prediction1} ${item.prediction2}`.toLowerCase().includes(comparisonFilter.value.toLowerCase())
+    `${item.prediction1} ${item.prediction2}`.toLowerCase().includes(comparisonFilter.value.toLowerCase()) &&
+    (comparisonModelFilter.value === '' || (item.modelUsed || 'v2') === comparisonModelFilter.value)
   )
 );
 
@@ -1945,6 +2151,49 @@ watch([result1, result2], async ([r1, r2]) => {
     drawComparisonCharts();
   }
 });
+const resetAll = () => {
+  // Single mode
+  file.value = null;
+  filePreview.value = null;
+  result.value = null;
+
+  // Compare mode
+  file1.value = null;
+  file2.value = null;
+  filePreview1.value = null;
+  filePreview2.value = null;
+  result1.value = null;
+  result2.value = null;
+  progressionDetected.value = false;
+
+  // Visual resets
+  dragOver1.value = false;
+  dragOver2.value = false;
+  dragOverSingle.value = false;
+
+  // Modals
+  showConfidenceCard.value = false;
+  selectedItem.value = null;
+  selectedComparison.value = null;
+
+  console.log("🧹 Reset all fields due to mode or model change.");
+};
+watch(selectedModel, () => {
+  resetAll();
+  fetchModelInfo(); // still fetch new model info
+});
+
+watch(compareMode, () => {
+  resetAll();
+});
+
+const hasStructuredRecommendations = computed(() => {
+  return result.value?.recommendations && typeof result.value.recommendations === 'object' && (
+    result.value.recommendations.diseases ||
+    result.value.recommendations.steps
+  );
+});
+
 
 </script>
 
@@ -2010,6 +2259,9 @@ input:focus {
 }
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
+}
+.text-xs strong {
+  color: #047857;
 }
 
 </style>

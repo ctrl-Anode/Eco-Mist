@@ -47,37 +47,404 @@ except Exception as e:
 CLASS_LABELS = ["Bacterial", "Fungal", "Healthy", "Cant Classified"]
 
 RECOMMENDATIONS = {
-    "Bacterial": [
-        "Apply copper-based bactericides as a preventative measure",
-        "Ensure proper spacing between plants for good air circulation",
-        "Remove and destroy infected plants to prevent spread",
-        "Avoid overhead irrigation to reduce leaf wetness",
-        "Rotate crops with non-host plants for at least 2 years"
-    ],
-    "Fungal": [
-        "Apply appropriate fungicides based on the specific fungal pathogen",
-        "Improve air circulation around plants by proper spacing",
-        "Water at the base of plants to keep foliage dry",
-        "Remove and destroy infected plant material",
-        "Use disease-resistant varieties in future plantings"
-    ],
-    "Healthy": [
-        "Continue regular monitoring for early signs of disease",
-        "Maintain proper watering schedule",
-        "Apply balanced fertilization",
-        "Practice crop rotation",
-        "Implement preventative measures during high-risk periods"
-    ],
-    "Cant Classified": [
-        "Take clearer images of the affected area",
-        "Consult with a local agricultural extension service",
-        "Monitor the plant for developing symptoms",
-        "Check for non-disease stressors like nutrient deficiencies",
-        "Consider submitting a physical sample for laboratory analysis"
+    "Bacterial": {
+        "type": "general",
+        "diseases": [
+            {
+                "name": "Bacterial Leaf Spot",
+                "description": "Small, water-soaked lesions that turn dark with yellow halos. Common in cool, wet conditions. Caused by Xanthomonas campestris pv. vitians.",
+                "treatments": [
+                    {
+                        "label": "Organic",
+                        "steps": [
+                            "Remove affected leaves promptly.",
+                            "Apply neem oil every 5–7 days.",
+                            "Water at the base to avoid leaf wetness.",
+                            "Increase spacing for better airflow."
+                        ]
+                    },
+                    {
+                        "label": "Chemical",
+                        "steps": [
+                            "Spray copper-based bactericide weekly.",
+                            "Avoid overhead irrigation.",
+                            "Sanitize tools regularly."
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Bacterial Soft Rot",
+                "description": "Wet, mushy rot with foul odor, especially at plant base. Caused by Pectobacterium carotovorum.",
+                "treatments": [
+                    {
+                        "label": "Cultural",
+                        "steps": [
+                            "Remove and destroy infected plants.",
+                            "Improve soil drainage.",
+                            "Avoid overwatering.",
+                            "Keep humidity low if possible."
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Corky Root",
+                "description": "Roots develop rough, corky lesions, stunting growth. Caused by Rhizomonas suberifaciens.",
+                "treatments": [
+                    {
+                        "label": "Preventive",
+                        "steps": [
+                            "Use resistant lettuce cultivars.",
+                            "Practice crop rotation.",
+                            "Avoid planting in previously infected soil."
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Marginal Leaf Blight",
+                "description": "Water-soaked streaks along leaf edges leading to necrosis. Caused by Pseudomonas marginalis.",
+                "treatments": [
+                    {
+                        "label": "General",
+                        "steps": [
+                            "Avoid overhead watering.",
+                            "Harvest early when leaf damage is visible.",
+                            "Apply bactericide if necessary."
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Varnish Spot",
+                "description": "Shiny dark lesions, especially under humid conditions. Caused by Pseudomonas cichorii.",
+                "treatments": [
+                    {
+                        "label": "Cultural",
+                        "steps": [
+                            "Reduce leaf wetness periods.",
+                            "Apply copper bactericide during humid spells.",
+                            "Improve air movement within canopy."
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "Fungal": {
+        "type": "general",
+        "diseases": [
+            {
+                "name": "Alternaria Leaf Spot",
+                "description": "Dark lesions with concentric rings. Caused by Alternaria sonchi.",
+                "treatments": [
+                    {
+                        "label": "Organic",
+                        "steps": [
+                            "Apply compost tea or neem oil.",
+                            "Improve plant ventilation.",
+                            "Remove affected leaves."
+                        ]
+                    },
+                    {
+                        "label": "Chemical",
+                        "steps": [
+                            "Spray with chlorothalonil or azoxystrobin fungicide weekly."
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Anthracnose",
+                "description": "Sunken leaf spots, especially on mature leaves. Caused by Microdochium panattonianum.",
+                "treatments": [
+                    {
+                        "label": "Fungicide",
+                        "steps": [
+                            "Apply mancozeb or chlorothalonil.",
+                            "Avoid overhead irrigation.",
+                            "Rotate crops annually."
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Bottom Rot",
+                "description": "Brown rot at base of plant, often under wet soil. Caused by Rhizoctonia solani.",
+                "treatments": [
+                    {
+                        "label": "Cultural",
+                        "steps": [
+                            "Improve soil drainage.",
+                            "Avoid excessive nitrogen fertilization.",
+                            "Space plants properly."
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Cercospora Leaf Spot",
+                "description": "Elongated spots with light centers and dark margins. Caused by Cercospora longissima.",
+                "treatments": [
+                    {
+                        "label": "Organic",
+                        "steps": [
+                            "Spray garlic extract or compost tea.",
+                            "Remove affected leaves.",
+                            "Increase airflow between plants."
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Damping-Off",
+                "description": "Seedlings rot at soil level and collapse. Caused by Pythium spp. and Rhizoctonia solani.",
+                "treatments": [
+                    {
+                        "label": "Preventive",
+                        "steps": [
+                            "Use sterile seed-starting mix.",
+                            "Avoid overwatering.",
+                            "Ensure good drainage."
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Downy Mildew",
+                "description": "Yellow spots on upper leaves, white fuzz underneath. Caused by Bremia lactucae.",
+                "treatments": [
+                    {
+                        "label": "Organic",
+                        "steps": [
+                            "Use resistant varieties.",
+                            "Apply compost tea or copper soap.",
+                            "Avoid watering foliage."
+                        ]
+                    },
+                    {
+                        "label": "Chemical",
+                        "steps": [
+                            "Apply fosetyl-Al or mancozeb every 7–10 days."
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Powdery Mildew",
+                "description": "White, powdery growth on leaves. Caused by Erysiphe cichoracearum.",
+                "treatments": [
+                    {
+                        "label": "Organic",
+                        "steps": [
+                            "Apply milk spray (1 part milk:9 parts water).",
+                            "Use neem oil or potassium bicarbonate."
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Gray Mold",
+                "description": "Soft, brown decay covered in gray fuzz. Caused by Botrytis cinerea.",
+                "treatments": [
+                    {
+                        "label": "Cultural",
+                        "steps": [
+                            "Remove decaying tissue promptly.",
+                            "Improve airflow.",
+                            "Avoid high humidity conditions."
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Sclerotinia Drop",
+                "description": "Wilting stem with white fungal growth and black sclerotia. Caused by Sclerotinia sclerotiorum.",
+                "treatments": [
+                    {
+                        "label": "Fungicide",
+                        "steps": [
+                            "Apply boscalid or fluazinam.",
+                            "Rotate with non-host crops.",
+                            "Bury crop residue after harvest."
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Septoria Leaf Spot",
+                "description": "Small yellow spots with black fruiting bodies. Caused by Septoria lactucae.",
+                "treatments": [
+                    {
+                        "label": "General",
+                        "steps": [
+                            "Apply chlorothalonil or mancozeb.",
+                            "Remove infected leaves regularly.",
+                            "Avoid overhead watering."
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "Nutrient Deficiency": {
+    "type": "general",
+    "diseases": [
+        {
+            "name": "Nitrogen Deficiency",
+            "description": "Leaves turn pale green to yellow starting from the older (lower) leaves. Stunted growth and thin stems.",
+            "treatments": [
+                {
+                    "label": "Organic",
+                    "steps": [
+                        "Apply compost or well-rotted manure.",
+                        "Use fish emulsion or blood meal.",
+                        "Foliar feed with seaweed extract weekly."
+                    ]
+                },
+                {
+                    "label": "Synthetic",
+                    "steps": [
+                        "Apply a nitrogen-rich fertilizer like urea or ammonium nitrate.",
+                        "Follow manufacturer instructions to avoid overfertilization."
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Phosphorus Deficiency",
+            "description": "Leaves may appear dark green with purple or reddish discoloration. Poor root development and delayed maturity.",
+            "treatments": [
+                {
+                    "label": "Organic",
+                    "steps": [
+                        "Add bone meal or rock phosphate to the soil.",
+                        "Use composted manure.",
+                        "Ensure soil pH is between 6.0–7.0 for phosphorus availability."
+                    ]
+                },
+                {
+                    "label": "Synthetic",
+                    "steps": [
+                        "Apply superphosphate or monoammonium phosphate.",
+                        "Water in thoroughly to help uptake."
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Potassium Deficiency",
+            "description": "Leaf edges turn yellow or brown (scorching), particularly in older leaves. Plants may be more prone to wilting and disease.",
+            "treatments": [
+                {
+                    "label": "Organic",
+                    "steps": [
+                        "Incorporate wood ash or kelp meal into soil.",
+                        "Use compost high in banana peels or leafy greens.",
+                        "Apply liquid seaweed fertilizer weekly."
+                    ]
+                },
+                {
+                    "label": "Synthetic",
+                    "steps": [
+                        "Apply muriate of potash or potassium sulfate.",
+                        "Avoid excess nitrogen which can worsen symptoms."
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Calcium Deficiency",
+            "description": "Young leaves are distorted or crinkled. Tips of leaves may appear scorched. Lettuce heads may be soft and deformed.",
+            "treatments": [
+                {
+                    "label": "Organic",
+                    "steps": [
+                        "Add crushed eggshells or ground limestone to the soil.",
+                        "Apply foliar spray with calcium chloride or calcium nitrate.",
+                        "Use compost with dairy waste if available."
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Magnesium Deficiency",
+            "description": "Older leaves show yellowing between veins (interveinal chlorosis), often with a reddish tint.",
+            "treatments": [
+                {
+                    "label": "Organic",
+                    "steps": [
+                        "Add Epsom salt (magnesium sulfate) to watering can (1 tbsp per gallon).",
+                        "Topdress with compost containing dolomitic lime.",
+                        "Foliar spray weekly until symptoms improve."
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Iron Deficiency",
+            "description": "Newer (younger) leaves turn yellow between veins, but veins stay green. Growth may be stunted.",
+            "treatments": [
+                {
+                    "label": "Organic",
+                    "steps": [
+                        "Apply iron chelates to soil or foliage.",
+                        "Ensure pH is not too alkaline (ideal 6.0–6.5).",
+                        "Use compost to improve soil microbial activity."
+                    ]
+                }
+            ]
+        }
+    ]
+},
+    "Healthy": {
+    "type": "status",
+    "description": "The lettuce appears healthy with no visible signs of disease, deficiency, or stress.",
+    "steps": [
+        "Continue regular watering and feeding schedules.",
+        "Maintain good air circulation and sunlight exposure.",
+        "Inspect weekly for early signs of pests or diseases.",
+        "Apply preventive foliar spray (e.g., compost tea or seaweed extract) once every 2 weeks."
+    ]
+},
+
+"Not Lettuce": {
+    "type": "status",
+    "description": "The uploaded image is not recognized as a lettuce plant. It may be another crop or object.",
+    "steps": [
+        "Please ensure the image shows a clear top-down or front view of a lettuce crop.",
+        "Avoid including human hands or background distractions.",
+        "Try again with a new, well-lit photo."
+    ]
+},
+
+"Mosaic Virus": {
+    "type": "general",
+    "description": "Mosaic virus causes mottled light and dark green patterns on leaves. Growth is stunted and leaves may curl.",
+    "steps": [
+        "Remove and destroy infected plants immediately.",
+        "Control aphids and other insect vectors with neem oil or insecticidal soap.",
+        "Avoid handling plants when wet to prevent spread.",
+        "Use virus-resistant lettuce varieties in future plantings."
+    ]
+},
+
+"Cannot Classify": {
+    "type": "status",
+    "description": "The system could not confidently classify the crop. The image may be unclear, or symptoms do not match known categories.",
+    "steps": [
+        "Ensure the plant is well-focused and well-lit in the image.",
+        "Capture symptoms clearly (e.g., full leaf, spots, rot, etc.).",
+        "Retake the photo from multiple angles if needed.",
+        "If issues persist, consult an agricultural expert or extension worker."
     ]
 }
+}
 
-@app.route('/predict', methods=['POST'])
+
+
+@app.route('/predict-v2', methods=['POST'])
 def predict():
     if model is None:
         return jsonify({"error": "Model failed to load"}), 500
@@ -94,7 +461,7 @@ def predict():
         if file is None:
             return jsonify({"error": "No file uploaded"}), 400
 
-        image = Image.open(io.BytesIO(file.read())).resize((224, 224))
+        image = Image.open(io.BytesIO(file.read())).convert("RGB").resize((224, 224))
         img_array = np.array(image) / 255.0
         img_array = np.expand_dims(img_array, axis=0)
 
@@ -125,7 +492,11 @@ def predict():
             "prediction": predicted_label,
             "confidence": round(confidence, 4),
             "class_probabilities": class_probabilities,
-            "recommendations": RECOMMENDATIONS[predicted_label],
+            "recommendations": RECOMMENDATIONS.get(predicted_label, {
+    "type": "unknown",
+    "description": "No recommendations found for this class.",
+    "steps": []
+}),
             "fallback_used": fallback_used  # 🟡 Optional, for frontend awareness
         })
 
@@ -142,7 +513,7 @@ def health_check():
         "model_loaded": model is not None
     })
 
-@app.route('/model-info', methods=['GET'])
+@app.route('/model-info-v2', methods=['GET'])
 def model_info():
     return jsonify({
         "model_name": "LettuceModelV2",
@@ -329,6 +700,232 @@ def verify_recaptcha():
     )
     result = response.json()
     return jsonify(result)
+
+@app.route('/predict-v3', methods=['POST'])
+def predict_alt_model():
+    try:
+        # ✅ Firebase Auth
+        decoded_user = verify_token(request)
+        uid = decoded_user['uid']
+        email = decoded_user.get('email', 'Unknown')
+        logger.info(f"🔐 Authorized user: {email} ({uid})")
+
+        # ✅ Get uploaded file
+        image_file = request.files.get('image') or request.files.get('file')
+        if not image_file:
+            return jsonify({"error": "No image uploaded"}), 400
+
+        file = image_file.read()
+
+        # ✅ Load model if not cached
+        alt_model = getattr(app, 'alt_model', None)
+        if alt_model is None:
+            alt_model = tf.saved_model.load("LettuceModelV3")
+            app.alt_model = alt_model
+        infer = alt_model.signatures["serving_default"]
+
+        # ✅ Preprocess
+        image = Image.open(io.BytesIO(file)).convert("RGB").resize((224, 224))
+        array = np.array(image) / 255.0
+        input_data = np.expand_dims(array, axis=0).astype(np.float32)
+        input_tensor = tf.convert_to_tensor(input_data)
+
+        # ✅ Predict
+        input_key = list(infer.structured_input_signature[1].keys())[0]
+        result = infer(**{input_key: input_tensor})
+        predictions = list(result.values())[0].numpy()[0]
+
+        # 🧠 Logic
+        ALL_CLASSES = ["Bacterial", "Fungal", "Healthy", "Lettuce", "Mosaic Virus", "Not Lettuce", "Nutrient Deficiency"]
+        LETTUCE_CLASSES = {"Bacterial", "Fungal", "Healthy", "Mosaic Virus", "Nutrient Deficiency", "Lettuce"}
+        NOT_LETTUCE_CLASS = "Not Lettuce"
+        CONFIDENCE_THRESHOLD = 0.50
+
+        pred_index = np.argmax(predictions)
+        predicted_label = ALL_CLASSES[pred_index]
+        confidence = float(predictions[pred_index])
+
+        # 🔁 Normalize for Model V2-style response
+        final_label = predicted_label
+        final_confidence = confidence
+
+        if confidence >= CONFIDENCE_THRESHOLD and predicted_label != NOT_LETTUCE_CLASS:
+            lettuce_indexes = [ALL_CLASSES.index(cls) for cls in LETTUCE_CLASSES if cls != "Lettuce"]
+            filtered_probs = [predictions[i] for i in lettuce_indexes]
+            best_index = lettuce_indexes[np.argmax(filtered_probs)]
+            final_label = ALL_CLASSES[best_index]
+            final_confidence = float(predictions[best_index])
+
+        normalized_result = {
+            "status": "success",
+            "prediction": final_label,
+            "confidence": round(final_confidence, 4),
+            "class_probabilities": {
+                ALL_CLASSES[i]: float(predictions[i]) for i in range(len(ALL_CLASSES))
+            },
+            "recommendations": RECOMMENDATIONS.get(final_label, {
+    "type": "unknown",
+    "description": "No recommendations found for this class.",
+    "steps": []
+}),
+            "fallback_used": confidence < CONFIDENCE_THRESHOLD,
+            "raw_model": "v3",
+            "message": "🚫 This is not a lettuce." if final_label == NOT_LETTUCE_CLASS else ""
+        }
+
+        return jsonify(normalized_result)
+
+    except Exception as e:
+        logger.error(f"❌ Alt model prediction error: {e}")
+        return jsonify({"status": "error", "error": str(e)}), 500
+
+
+
+@app.route('/model-info-v3', methods=['GET'])
+def model_info_alt():
+    try:
+        # 🔁 Load alt model if not yet cached
+        alt_model = getattr(app, 'alt_model', None)
+        if alt_model is None:
+            alt_model = tf.saved_model.load("LettuceModelV3")
+            app.alt_model = alt_model
+
+        # 🧠 Return model structure info
+        ALL_CLASSES = ["Bacterial", "Fungal", "Healthy", "Lettuce", "Mosaic Virus", "Not Lettuce", "Nutrient Deficiency"]
+        SUBCLASS_MAP = {
+            "Bacterial": ["Bacterial_Leaf_Spot", "Bacterial_Soft_Rot", "Wilt_and_Leaf_Blight"],
+            "Fungal": ["Anthracnose", "Bottom Rot", "Downy Mildew", "Powdery Mildew", "Septoria Blight"],
+            "Healthy": [], "Lettuce": [], "Mosaic Virus": [], "Nutrient Deficiency": [],
+            "Not Lettuce": ["Apple", "Banana", "Bean", "Beetroot", "Carrot", "Tomato", "Watermelon"]
+        }
+
+        return jsonify({
+            "model_name": "LettuceModelV3",
+            "type": "SavedModel",
+            "input_shape": [224, 224, 3],
+            "classes": ALL_CLASSES,
+            "subclass_map": SUBCLASS_MAP,
+            "version": "2.0.0"
+        })
+
+    except Exception as e:
+        logger.error(f"❌ Failed to get alt model info: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/predict', methods=['POST'])
+def unified_predict():
+    model_choice = request.form.get('model', 'v2')
+
+    if model_choice == 'v2':
+        return predict()
+    elif model_choice == 'v3':
+        return predict_alt_model()
+    else:
+        return jsonify({"error": f"Invalid model choice: {model_choice}"}), 400
+
+@app.route('/model-info', methods=['GET'])
+def unified_model_info():
+    model_choice = request.args.get('model', 'v2')
+
+    if model_choice == 'v2':
+        return model_info()
+    elif model_choice == 'v3':
+        return model_info_alt()
+    else:
+        return jsonify({"error": "Invalid model choice"}), 400
+CLASS_SEVERITY = {
+    "Healthy": 0,
+    "Nutrient Deficiency": 1,
+    "Fungal": 2,
+    "Bacterial": 3,
+    "Mosaic Virus": 4,
+    "Cant Classified": 5,
+    "Not Lettuce": 6
+}
+@app.route('/predict-compare', methods=['POST'])
+def predict_compare():
+    try:
+        # ✅ Verify user
+        decoded_user = verify_token(request)
+        uid = decoded_user["uid"]
+        email = decoded_user.get("email", "Unknown")
+
+        # ✅ Get files and model
+        file_before = request.files.get('file_before')
+        file_after = request.files.get('file_after')
+        model_choice = request.form.get("model", "v2")
+
+        if not file_before or not file_after:
+            return jsonify({"error": "Both images are required"}), 400
+
+        # ✅ Choose prediction route
+        def predict_image(file, model_choice):
+            with app.test_request_context(
+                '/predict',
+                method='POST',
+                data={'model': model_choice, 'file': (file, "image.jpg")},
+                headers={"Authorization": f"Bearer {request.headers.get('Authorization', '').split(' ')[1]}"}
+            ):
+                if model_choice == "v2":
+                    return predict().json
+                elif model_choice == "v3":
+                    return predict_alt_model().json
+
+        # ✅ Predict both images
+        before_result = predict_image(file_before, model_choice)
+        after_result = predict_image(file_after, model_choice)
+
+        # 🧠 Progress Analysis
+        before_label = before_result["prediction"]
+        after_label = after_result["prediction"]
+
+        severity_map = {
+            "Healthy": 0,
+            "Nutrient Deficiency": 1,
+            "Fungal": 2,
+            "Bacterial": 3,
+            "Mosaic Virus": 4,
+            "Cant Classified": 5,
+            "Not Lettuce": 6
+        }
+
+        before_score = severity_map.get(before_label, 10)
+        after_score = severity_map.get(after_label, 10)
+
+        if before_label == after_label:
+            progress = "same"
+        elif after_score < before_score:
+            progress = "improved"
+        elif after_score > before_score:
+            progress = "worsened"
+        else:
+            progress = "changed"
+
+        suggestion = {
+            "improved": "✅ Disease condition improved. Continue current care practices.",
+            "worsened": "⚠️ Condition worsened. Apply urgent treatment based on new diagnosis.",
+            "changed": "🔁 Disease type changed. Consider reanalyzing care strategy.",
+            "same": "ℹ️ No change detected. Continue monitoring closely."
+        }[progress]
+
+        return jsonify({
+            "status": "success",
+            "model": model_choice,
+            "before": before_result,
+            "after": after_result,
+            "progress": progress,
+            "message": suggestion,
+            "recommendation": RECOMMENDATIONS.get(after_label, {
+                "type": "unknown",
+                "description": "No recommendation available.",
+                "steps": []
+            })
+        })
+
+    except Exception as e:
+        logger.error(f"❌ Compare prediction error: {e}")
+        return jsonify({"status": "error", "error": str(e)}), 500
+
 
 # Main entry point
 if __name__ == '__main__':

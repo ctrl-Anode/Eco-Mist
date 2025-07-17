@@ -4,17 +4,15 @@ This template should help get you started developing with Vue 3 in Vite. The tem
 
 Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
 
-7-11-25
+7-17-25
 
 app.py
-authentication
--footer
--login
--register
-ecoadmin_logger
-authlogger
--logauthevent.js
--ecoauth
-main.js
-router.js
-package
+test.py
+lettucemodelv3
+ecoadmin
+-cropanalytics
+ecouserchild
+-sampledetector
+ecotry
+ecoadminparent
+router

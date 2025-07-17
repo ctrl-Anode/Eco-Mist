@@ -114,7 +114,8 @@ const navigationSections = computed(() => [
     routes: [
       { path: '/admin/dashboard', name: 'Dashboard', meta: { requiresAuth: true } },
       { path: '/admin/messenger', name: 'Messenger', meta: { requiresAuth: true } },
-      { path: '/admin/user-management', name: 'User Management', meta: { requiresAuth: true, role: 'admin' } }
+      { path: '/admin/user-management', name: 'User Management', meta: { requiresAuth: true, role: 'admin' } },
+      { path: '/admin/crop-analysis-analytics-management', name: 'Crop Analytics', meta: { requiresAuth: true, role: 'admin' } }
       //{ path: '/admin/messenger', name: 'Messenger', meta: { requiresAuth: true } }
     ]
   },
